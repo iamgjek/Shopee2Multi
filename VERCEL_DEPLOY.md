@@ -48,14 +48,20 @@
 進入 **Settings** → **Environment Variables**，添加：
 
 ```
-VITE_API_URL=https://shopee2multi.vercel.app
+VITE_API_URL=https://shopee2multi-backend.railway.app
 ```
 
 **重要**：
-- 將 `your-backend-url.railway.app` 替換為您實際的後端 URL
-- 如果後端尚未部署，可以先設置為 `http://localhost:3001`（僅用於測試）
-- 部署後端後再更新此環境變數
-- **必須設置此環境變數**，否則 API 請求可能無法正常工作
+- ⚠️ **必須設置此環境變數**，否則 API 請求會失敗
+- 將 `your-backend.railway.app` 替換為您實際的後端 URL（例如：`https://shopee2multi-backend.railway.app`）
+- 如果後端尚未部署，可以先設置為 `http://localhost:3001`（僅用於本地測試）
+- 部署後端後再更新此環境變數為實際的後端 URL
+
+**為什麼必須設置？**
+1. 如果不設置，會使用後備值 `/api`
+2. 在 Vercel 上，`/api` 請求會被 SPA fallback 規則捕獲，重定向到 `index.html`
+3. 這會導致所有 API 請求失敗（返回 HTML 而不是 JSON）
+4. 後端部署在另一個服務器（Railway/Render），需要完整的 URL 才能訪問
 
 ### 5. 部署
 
