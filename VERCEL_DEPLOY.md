@@ -128,31 +128,76 @@ VITE_API_URL=https://shopee2multi-backend.railway.app
 - 當用戶直接訪問非根路徑時，Vercel 會在伺服器端尋找對應的檔案
 - 如果沒有配置 SPA fallback，找不到檔案就會回傳 404
 
+**診斷步驟**:
+
+1. **檢查 vercel.json 配置**：
+   - 確認 `frontend/vercel.json` 文件存在
+   - 確認包含以下配置：
+     ```json
+     {
+       "rewrites": [
+         {
+           "source": "/(.*)",
+           "destination": "/index.html"
+         }
+       ]
+     }
+     ```
+
+2. **檢查 Vercel 項目設置**：
+   - 進入 Vercel Dashboard → 項目 Settings → General
+   - 確認 **Root Directory** 設置為 `frontend`
+   - 確認 **Framework Preset** 為 `Vite`
+   - 確認 **Output Directory** 為 `dist`
+
+3. **檢查構建日誌**：
+   - 進入 Vercel Dashboard → Deployments
+   - 點擊最新的部署，查看構建日誌
+   - 確認構建成功，沒有錯誤
+   - 確認 `dist` 目錄中有 `index.html` 檔案
+
+4. **檢查部署檔案**：
+   - 在部署詳情頁面，點擊 "View Function Logs"
+   - 檢查是否有路由相關的錯誤
+
+5. **測試不同路由**：
+   - 測試首頁：`https://shopee2multi.vercel.app/`（應該正常）
+   - 測試路由：`https://shopee2multi.vercel.app/dashboard`（應該回傳 index.html）
+   - 測試靜態資源：`https://shopee2multi.vercel.app/assets/...`（應該正常載入）
+
 **解決方案**:
-1. 確認 `frontend/vercel.json` 文件存在且包含以下配置：
-   ```json
-   {
-     "rewrites": [
-       {
-         "source": "/(.*)",
-         "destination": "/index.html"
-       }
-     ]
-   }
-   ```
-2. 如果配置正確但仍出現問題：
-   - 確認 `vercel.json` 位於 `frontend/` 目錄下
-   - 確認 Root Directory 設置為 `frontend`
-   - 重新部署項目
-3. 測試方法：
-   - 直接訪問 `https://shopee2multi.vercel.app/dashboard`
-   - 應該顯示登入頁面（如果未登入）或儀表板（如果已登入）
-   - 不應出現 404 錯誤
+
+1. **如果 vercel.json 配置缺失或錯誤**：
+   - 確保 `frontend/vercel.json` 包含正確的 rewrite 規則
+   - 提交並推送代碼到 GitHub
+   - Vercel 會自動重新部署
+
+2. **如果 Root Directory 設置錯誤**：
+   - 進入 Vercel Dashboard → Settings → General
+   - 將 Root Directory 設置為 `frontend`
+   - 手動觸發重新部署
+
+3. **如果構建失敗**：
+   - 檢查構建日誌中的錯誤訊息
+   - 確認 `package.json` 中的 build 腳本正確
+   - 確認所有依賴都已安裝
+
+4. **如果配置都正確但仍出現問題**：
+   - 清除 Vercel 快取：Settings → General → Clear Build Cache
+   - 手動觸發重新部署
+   - 等待部署完成後再次測試
+
+**測試方法**：
+- 直接訪問 `https://shopee2multi.vercel.app/dashboard`
+- 應該顯示登入頁面（如果未登入）或儀表板（如果已登入）
+- 不應出現 404 錯誤
+- 在瀏覽器開發者工具的 Network 標籤中，檢查請求的 Response 應該是 HTML（index.html），而不是 404 JSON
 
 **預防措施**:
 - 在部署前檢查 `vercel.json` 配置
 - 測試所有路由的直接訪問
 - 測試重新整理功能
+- 在本地使用 `npm run build && npm run preview` 測試構建結果
 
 ## 自動部署
 
