@@ -7,7 +7,6 @@ import Converter from './pages/Converter'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Pricing from './pages/Pricing'
 import { useAuthStore } from './store/authStore'
 
 function App() {

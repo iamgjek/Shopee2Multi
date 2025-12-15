@@ -57,7 +57,7 @@ export default function Pricing() {
     }
   ]
 
-  const handleUpgrade = (plan: string) => {
+  const handleUpgrade = (_plan: string) => {
     if (!token) {
       navigate('/register')
     } else {
