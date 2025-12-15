@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: shopee2multi-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        sync: false
+
+databases:
+  - name: shopee2multi-db
+    plan: free
+    databaseName: shopee2multi
+    user: shopee2multi
+
