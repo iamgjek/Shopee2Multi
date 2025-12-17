@@ -70,10 +70,10 @@ export default function Home() {
       {/* Hero Section */}
       <div style={sectionStyle}>
         <Title style={heroTitleStyle}>
-          30 秒，從蝦皮到全平台。
+          30 秒，從蝦皮到全平台
         </Title>
         <Paragraph style={subtitleStyle}>
-          一鍵轉檔，讓你的商品自由移動。
+          一鍵轉檔，讓你的商品自由移動
         </Paragraph>
         <Button 
           type="primary" 
@@ -90,17 +90,17 @@ export default function Home() {
       {/* 從此告別手動上架 */}
       <div style={sectionStyle}>
         <Title level={2} style={sectionTitleStyle}>
-          從此告別手動上架。
+          從此告別手動上架
         </Title>
         <Paragraph style={bodyTextStyle}>
-          你不該把時間浪費在複製貼上。
+          你不該把時間浪費在複製貼上
         </Paragraph>
         <Paragraph style={bodyTextStyle}>
-          Shopee2Multi 讓商品轉檔變得極其簡單。貼上網址，30 秒內完成。<br />
-          不需要學習複雜的系統，不需要昂貴的 ERP，更不需要外包。
+          Shopee2Multi 讓商品轉檔變得極其簡單貼上網址，30 秒內完成<br />
+          不需要學習複雜的系統，不需要昂貴的 ERP，更不需要外包
         </Paragraph>
         <Paragraph style={{ ...bodyTextStyle, fontSize: '24px', fontWeight: 500, color: darkGray }}>
-          只需要一個網址。
+          只需要一個網址
         </Paragraph>
       </div>
 
@@ -109,7 +109,7 @@ export default function Home() {
       {/* 時間是你最寶貴的資產 */}
       <div style={sectionStyle}>
         <Title level={2} style={sectionTitleStyle}>
-          時間，是你最寶貴的資產。
+          時間，是你最寶貴的資產
         </Title>
         <div style={{ marginTop: '60px' }}>
           <Row gutter={[48, 48]} justify="center">
@@ -130,8 +130,8 @@ export default function Home() {
             </Col>
           </Row>
           <Paragraph style={{ ...bodyTextStyle, marginTop: '48px' }}>
-            100 件商品，從蝦皮搬到 momo。<br />
-            省下的 24 小時，你可以做更重要的事。
+            100 件商品，從蝦皮搬到 momo<br />
+            省下的 24 小時，你可以做更重要的事
           </Paragraph>
         </div>
       </div>
@@ -141,18 +141,18 @@ export default function Home() {
       {/* 設計給像你一樣的賣家 */}
       <div style={sectionStyle}>
         <Title level={2} style={sectionTitleStyle}>
-          設計給像你一樣的賣家。
+          設計給像你一樣的賣家
         </Title>
         <Paragraph style={{ ...bodyTextStyle, marginTop: '48px' }}>
-          <strong style={{ color: darkGray, fontSize: '24px' }}>你不需要懂技術。</strong>
+          <strong style={{ color: darkGray, fontSize: '24px' }}>你不需要懂技術</strong>
         </Paragraph>
         <Paragraph style={bodyTextStyle}>
-          不需要安裝軟體。<br />
-          不需要設定參數。<br />
-          不需要教育訓練。
+          不需要安裝軟體<br />
+          不需要設定參數<br />
+          不需要教育訓練
         </Paragraph>
         <Paragraph style={{ ...bodyTextStyle, fontSize: '24px', fontWeight: 500, color: darkGray, marginTop: '36px' }}>
-          打開瀏覽器，貼上網址，完成。
+          打開瀏覽器，貼上網址，完成
         </Paragraph>
       </div>
 
@@ -161,7 +161,7 @@ export default function Home() {
       {/* 智能轉換 */}
       <div style={{ ...sectionStyle, padding: '100px 24px' }}>
         <Title level={2} style={sectionTitleStyle}>
-          智能轉換，自動完成。
+          智能轉換，自動完成
         </Title>
         <Row gutter={[48, 48]} style={{ marginTop: '60px' }}>
           <Col xs={24} md={8}>
@@ -179,7 +179,7 @@ export default function Home() {
                 AI 語意解析
               </Title>
               <Paragraph style={{ fontSize: '17px', color: mediumGray, lineHeight: '1.6' }}>
-                蝦皮的短描述，自動轉換成 momo 需要的長文案。不用重寫，不用苦惱。
+                蝦皮的短描述，自動轉換成 momo 需要的長文案不用重寫，不用苦惱
               </Paragraph>
             </Card>
           </Col>
@@ -198,7 +198,7 @@ export default function Home() {
                 規格智能映射
               </Title>
               <Paragraph style={{ fontSize: '17px', color: mediumGray, lineHeight: '1.6' }}>
-                單層規格變雙層。HTML 描述自動生成。圖片自動裁切符合平台尺寸。
+                單層規格變雙層HTML 描述自動生成圖片自動裁切符合平台尺寸
               </Paragraph>
             </Card>
           </Col>
@@ -234,7 +234,7 @@ export default function Home() {
       {/* 價格方案 */}
       <div id="pricing-section" style={{ ...sectionStyle, padding: '100px 24px', maxWidth: '1200px' }}>
         <Title level={2} style={sectionTitleStyle}>
-          價格不該是阻礙。
+          價格不該是阻礙
         </Title>
         <Row gutter={[32, 32]} style={{ marginTop: '60px' }}>
           {[
@@ -379,15 +379,15 @@ export default function Home() {
       {/* 最終 CTA */}
       <div style={sectionStyle}>
         <Title level={2} style={sectionTitleStyle}>
-          從今天開始，讓商品自由移動。
+          從今天開始，讓商品自由移動
         </Title>
         <Paragraph style={bodyTextStyle}>
-          不要被平台綁住。<br />
-          不要被技術困住。<br />
-          不要被時間限制。
+          不要被平台綁住<br />
+          不要被技術困住<br />
+          不要被時間限制
         </Paragraph>
         <Paragraph style={{ ...bodyTextStyle, marginTop: '36px', marginBottom: '48px' }}>
-          <strong style={{ fontSize: '28px', color: darkGray }}>30 秒，從蝦皮到全平台。</strong>
+          <strong style={{ fontSize: '28px', color: darkGray }}>30 秒，從蝦皮到全平台</strong>
         </Paragraph>
         <Button 
           type="primary" 
@@ -407,7 +407,7 @@ export default function Home() {
         borderTop: '1px solid #f0f0f0'
       }}>
         <Text style={{ fontSize: '15px', color: mediumGray }}>
-          技術為你服務，而非你為技術服務。
+          技術為你服務，而非你為技術服務
         </Text>
         <div style={{ marginTop: '12px' }}>
           <Text style={{ fontSize: '17px', fontWeight: 500, color: darkGray }}>
