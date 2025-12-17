@@ -5,15 +5,19 @@ const { Text } = Typography
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const mediumGray = '#757575'
 
   return (
     <AntFooter style={{ 
       textAlign: 'center',
-      background: '#fff',
+      background: '#fafafa',
       borderTop: '1px solid #f0f0f0',
-      padding: '24px 50px'
+      padding: '32px 48px'
     }}>
-      <Text type="secondary">
+      <Text style={{ 
+        fontSize: '15px',
+        color: mediumGray
+      }}>
         © {currentYear} Shopee2Multi. All rights reserved.
       </Text>
     </AntFooter>

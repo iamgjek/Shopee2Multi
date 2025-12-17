@@ -78,7 +78,7 @@ export default function Home() {
         <Button 
           type="primary" 
           size="large"
-          onClick={() => navigate(token ? '/convert' : '/register')}
+          onClick={() => navigate(token ? '/converter' : '/register')}
           style={primaryButtonStyle}
         >
           立即開始免費試用
@@ -392,7 +392,7 @@ export default function Home() {
         <Button 
           type="primary" 
           size="large"
-          onClick={() => navigate(token ? '/convert' : '/register')}
+          onClick={() => navigate(token ? '/converter' : '/register')}
           style={primaryButtonStyle}
         >
           立即開始免費試用
