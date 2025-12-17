@@ -1,13 +1,6 @@
-import { Layout, Menu, Button, Space, Avatar, Dropdown } from 'antd'
+import { Layout, Avatar, Dropdown } from 'antd'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { 
-  HomeOutlined, 
-  ToolOutlined, 
-  DashboardOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  DollarOutlined
-} from '@ant-design/icons'
+import { UserOutlined, LogoutOutlined } from '@ant-design/icons'
 import { useAuthStore } from '../store/authStore'
 
 const { Header: AntHeader } = Layout
@@ -20,6 +13,7 @@ export default function Header() {
   // 深藍色主題色（Material Design Blue 700）
   const primaryColor = '#1976d2'
   const darkGray = '#212121'
+  const mediumGray = '#757575'
 
   const handleLogout = () => {
     clearAuth()
@@ -38,40 +32,24 @@ export default function Header() {
     }
   }
 
-  const menuItems = [
-    {
-      key: '/',
-      icon: <HomeOutlined />,
-      label: <Link to="/" style={{ color: 'inherit' }}>首頁</Link>,
-    },
-    {
-      key: '/pricing',
-      icon: <DollarOutlined />,
-      label: <a href="#pricing-section" onClick={handlePricingClick} style={{ color: 'inherit' }}>價格方案</a>,
-    },
-  ]
-
-  if (token) {
-    menuItems.push(
-      {
-        key: '/converter',
-        icon: <ToolOutlined />,
-        label: <Link to="/converter" style={{ color: 'inherit' }}>轉檔工具</Link>,
-      },
-      {
-        key: '/dashboard',
-        icon: <DashboardOutlined />,
-        label: <Link to="/dashboard" style={{ color: 'inherit' }}>儀表板</Link>,
-      }
-    )
-  }
-
   const userMenuItems = [
     {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: '個人資料',
+      key: 'email',
+      label: (
+        <div style={{ padding: '4px 0', borderBottom: '1px solid #f0f0f0', marginBottom: '8px' }}>
+          <div style={{ fontSize: '14px', color: mediumGray, marginBottom: '4px' }}>登入身分</div>
+          <div style={{ fontSize: '15px', color: darkGray, fontWeight: 500 }}>{user?.email}</div>
+        </div>
+      ),
+      disabled: true
+    },
+    {
+      key: 'dashboard',
+      label: '儀表板',
       onClick: () => navigate('/dashboard'),
+    },
+    {
+      type: 'divider' as const
     },
     {
       key: 'logout',
@@ -88,108 +66,167 @@ export default function Header() {
     return '免費版'
   }
 
+  const navLinkStyle = (isActive: boolean) => ({
+    color: isActive ? darkGray : mediumGray,
+    textDecoration: 'none',
+    fontSize: '15px',
+    fontWeight: 500,
+    padding: '0 20px',
+    transition: 'color 0.2s ease',
+    display: 'inline-block',
+    lineHeight: '64px',
+    borderBottom: isActive ? `2px solid ${primaryColor}` : '2px solid transparent'
+  })
+
   return (
     <AntHeader style={{ 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'space-between',
-      background: '#ffffff',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      padding: '0 48px',
+      background: 'rgba(255, 255, 255, 0.8)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      boxShadow: '0 1px 0 rgba(0,0,0,0.05)',
+      padding: '0 max(24px, calc((100vw - 1200px) / 2))',
       height: '64px',
-      borderBottom: '1px solid #f0f0f0'
+      borderBottom: '1px solid rgba(0,0,0,0.05)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1000
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
-        <Link to="/" style={{ 
-          fontSize: '22px', 
-          fontWeight: 700, 
-          color: darkGray,
-          marginRight: '48px',
-          textDecoration: 'none',
-          whiteSpace: 'nowrap',
-          letterSpacing: '-0.5px'
-        }}>
-          Shopee2Multi
+      {/* Logo */}
+      <Link to="/" style={{ 
+        fontSize: '20px', 
+        fontWeight: 700, 
+        color: darkGray,
+        textDecoration: 'none',
+        letterSpacing: '-0.5px',
+        marginRight: '60px'
+      }}>
+        Shopee2Multi
+      </Link>
+
+      {/* Navigation Links - Apple Style */}
+      <nav style={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        flex: 1,
+        gap: '4px'
+      }}>
+        <Link 
+          to="/" 
+          style={navLinkStyle(location.pathname === '/')}
+          onMouseOver={(e) => { if (location.pathname !== '/') e.currentTarget.style.color = darkGray }}
+          onMouseOut={(e) => { if (location.pathname !== '/') e.currentTarget.style.color = mediumGray }}
+        >
+          首頁
         </Link>
-        <Menu
-          mode="horizontal"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          style={{ 
-            borderBottom: 'none',
-            flex: 1,
-            minWidth: 0,
-            lineHeight: '64px',
-            fontSize: '15px',
-            fontWeight: 500
-          }}
-          overflowedIndicator={null}
-          triggerSubMenuAction="click"
-        />
-      </div>
-      <Space size={16}>
+        <a 
+          href="#pricing-section" 
+          onClick={handlePricingClick}
+          style={navLinkStyle(location.pathname === '/pricing')}
+          onMouseOver={(e) => { if (location.pathname !== '/pricing') e.currentTarget.style.color = darkGray }}
+          onMouseOut={(e) => { if (location.pathname !== '/pricing') e.currentTarget.style.color = mediumGray }}
+        >
+          價格方案
+        </a>
+        {token && (
+          <>
+            <Link 
+              to="/converter" 
+              style={navLinkStyle(location.pathname === '/converter')}
+              onMouseOver={(e) => { if (location.pathname !== '/converter') e.currentTarget.style.color = darkGray }}
+              onMouseOut={(e) => { if (location.pathname !== '/converter') e.currentTarget.style.color = mediumGray }}
+            >
+              轉檔工具
+            </Link>
+            <Link 
+              to="/dashboard" 
+              style={navLinkStyle(location.pathname === '/dashboard')}
+              onMouseOver={(e) => { if (location.pathname !== '/dashboard') e.currentTarget.style.color = darkGray }}
+              onMouseOut={(e) => { if (location.pathname !== '/dashboard') e.currentTarget.style.color = mediumGray }}
+            >
+              儀表板
+            </Link>
+          </>
+        )}
+      </nav>
+
+      {/* Right Section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {token ? (
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
+          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px',
+              cursor: 'pointer',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              transition: 'background 0.2s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = '#f5f5f5'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+            >
               <Avatar 
+                size={32}
                 icon={<UserOutlined />}
-                style={{ background: primaryColor }}
+                style={{ 
+                  background: primaryColor,
+                  fontSize: '14px'
+                }}
               />
-              <span style={{ 
-                fontSize: '15px',
-                color: darkGray,
-                fontWeight: 500
-              }}>
-                {user?.email}
-              </span>
               {user?.plan && (
                 <span style={{ 
-                  padding: '4px 12px', 
-                  background: user.plan === 'free' ? '#f5f5f5' : `${primaryColor}15`,
-                  color: user.plan === 'free' ? darkGray : primaryColor,
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 500
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: user.plan === 'free' ? mediumGray : primaryColor
                 }}>
                   {getPlanName()}
                 </span>
               )}
-            </Space>
+            </div>
           </Dropdown>
         ) : (
           <>
-            <Button 
-              type="text" 
+            <button
               onClick={() => navigate('/login')}
               style={{
+                background: 'transparent',
+                border: 'none',
+                color: mediumGray,
                 fontSize: '15px',
                 fontWeight: 500,
-                color: darkGray,
-                height: '40px'
+                padding: '8px 16px',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease'
               }}
+              onMouseOver={(e) => e.currentTarget.style.color = darkGray}
+              onMouseOut={(e) => e.currentTarget.style.color = mediumGray}
             >
               登入
-            </Button>
-            <Button 
-              type="primary" 
+            </button>
+            <button
               onClick={() => navigate('/register')}
               style={{
-                height: '40px',
+                background: primaryColor,
+                border: 'none',
+                color: '#ffffff',
                 fontSize: '15px',
                 fontWeight: 500,
-                borderRadius: '20px',
-                background: primaryColor,
-                borderColor: primaryColor,
-                boxShadow: 'none',
-                border: 'none',
-                padding: '0 24px'
+                padding: '8px 20px',
+                borderRadius: '18px',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease'
               }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
             >
               註冊
-            </Button>
+            </button>
           </>
         )}
-      </Space>
+      </div>
     </AntHeader>
   )
 }
