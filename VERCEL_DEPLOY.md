@@ -53,7 +53,7 @@ VITE_API_URL=https://shopee2multi-backend.railway.app
 
 **重要**：
 - ⚠️ **必須設置此環境變數**，否則 API 請求會失敗
-- 將 `your-backend.railway.app` 替換為您實際的後端 URL（例如：`https://shopee2multi-backend.railway.app`）
+- 將 `shopee2multi-backend.railway.app` 替換為您實際的後端 URL（不需要包含 `/api`，代碼會自動添加）
 - 如果後端尚未部署，可以先設置為 `http://localhost:3001`（僅用於本地測試）
 - 部署後端後再更新此環境變數為實際的後端 URL
 
@@ -62,6 +62,29 @@ VITE_API_URL=https://shopee2multi-backend.railway.app
 2. 在 Vercel 上，`/api` 請求會被 SPA fallback 規則捕獲，重定向到 `index.html`
 3. 這會導致所有 API 請求失敗（返回 HTML 而不是 JSON）
 4. 後端部署在另一個服務器（Railway/Render），需要完整的 URL 才能訪問
+
+### 4.5. 配置後端 CORS（重要！）
+
+⚠️ **必須在 Railway 後端設置 CORS_ORIGIN 環境變數**，否則會出現 CORS 錯誤。
+
+1. 進入 Railway Dashboard → 您的後端服務
+2. 點擊 **Variables** 標籤
+3. 添加或更新環境變數：
+   ```
+   CORS_ORIGIN=https://shopee2multi.vercel.app
+   ```
+   - 將 `shopee2multi.vercel.app` 替換為您實際的前端 URL
+   - 如果需要支援多個域名（例如開發和生產環境），可以用逗號分隔：
+     ```
+     CORS_ORIGIN=https://shopee2multi.vercel.app,http://localhost:5173
+     ```
+4. Railway 會自動重新部署後端服務
+
+**如果出現 CORS 錯誤**：
+- 確認 `CORS_ORIGIN` 環境變數已設置且值正確
+- 確認前端 URL 與後端設置的 `CORS_ORIGIN` 完全匹配（包括 `https://` 協議）
+- 清除瀏覽器快取並重新載入頁面
+- 檢查 Railway 部署日誌，確認環境變數已生效
 
 ### 5. 部署
 
@@ -109,6 +132,56 @@ VITE_API_URL=https://shopee2multi-backend.railway.app
 1. 確認 `VITE_API_URL` 環境變數已設置
 2. 檢查後端 CORS 設置是否允許前端域名
 3. 確認後端服務正在運行
+
+### CORS 錯誤（Access-Control-Allow-Origin）
+
+**問題**: 瀏覽器控制台出現以下錯誤：
+```
+Origin https://shopee2multi.vercel.app is not allowed by Access-Control-Allow-Origin
+XMLHttpRequest cannot load https://shopee2multi-backend.railway.app/api/... due to access control checks
+```
+
+**原因**:
+- 後端的 `CORS_ORIGIN` 環境變數未設置或設置錯誤
+- 前端 URL 與後端設置的允許來源不匹配
+- 後端 CORS 配置不正確
+
+**解決方案**:
+
+1. **檢查 Railway 後端環境變數**：
+   - 進入 Railway Dashboard → 後端服務 → Variables
+   - 確認 `CORS_ORIGIN` 環境變數存在
+   - 確認值為您的前端 URL（例如：`https://shopee2multi.vercel.app`）
+   - **重要**：URL 必須完全匹配，包括協議（`https://`）和域名
+
+2. **設置或更新 CORS_ORIGIN**：
+   ```
+   CORS_ORIGIN=https://shopee2multi.vercel.app
+   ```
+   - 如果需要支援多個域名，用逗號分隔：
+     ```
+     CORS_ORIGIN=https://shopee2multi.vercel.app,http://localhost:5173
+     ```
+
+3. **重新部署後端**：
+   - Railway 會在環境變數更改後自動重新部署
+   - 等待部署完成（通常需要 1-2 分鐘）
+
+4. **驗證修復**：
+   - 清除瀏覽器快取
+   - 重新載入頁面
+   - 檢查瀏覽器開發者工具的 Network 標籤
+   - 確認 API 請求返回 200 狀態碼，而不是 CORS 錯誤
+
+5. **檢查後端日誌**：
+   - 進入 Railway Dashboard → 後端服務 → Deployments
+   - 查看最新部署的日誌
+   - 確認沒有 CORS 相關的警告訊息
+
+**預防措施**:
+- 在部署前端之前，先設置後端的 `CORS_ORIGIN` 環境變數
+- 確保前端 URL 與後端設置的 `CORS_ORIGIN` 完全匹配
+- 在部署文檔中記錄正確的 CORS 配置步驟
 
 ### 環境變數未生效
 

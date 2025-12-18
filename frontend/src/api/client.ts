@@ -1,8 +1,16 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
 
+// Configure baseURL for API requests
+// If VITE_API_URL is set, use it (should be full backend URL, e.g., https://backend.railway.app)
+// If not set, use '/api' for local development (Vite proxy will handle it)
+const apiUrl = import.meta.env.VITE_API_URL;
+const baseURL = apiUrl 
+  ? (apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`)  // Ensure /api suffix
+  : '/api';  // Fallback for local development
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
