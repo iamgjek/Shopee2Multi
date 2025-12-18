@@ -18,10 +18,30 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(helmet());
 
-// CORS configuration - support multiple origins
+// CORS configuration - support multiple origins and Vercel preview deployments
 const allowedOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173'];
+
+// Helper function to check if origin is allowed
+const isOriginAllowed = (origin: string): boolean => {
+  // Check explicit allowed origins
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+  
+  // Allow Vercel preview deployments (*.vercel.app)
+  if (origin.endsWith('.vercel.app')) {
+    return true;
+  }
+  
+  // Allow localhost for development
+  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    return true;
+  }
+  
+  return false;
+};
 
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -30,10 +50,10 @@ app.use(cors({
       return callback(null, true);
     }
     
-    if (allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
-      console.warn(`⚠️  CORS blocked: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
+      console.warn(`⚠️  CORS blocked: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
       callback(new Error('Not allowed by CORS'));
     }
   },

@@ -78,11 +78,18 @@ VITE_API_URL=https://shopee2multi-backend.railway.app
      ```
      CORS_ORIGIN=https://shopee2multi.vercel.app,http://localhost:5173
      ```
+
 4. Railway 會自動重新部署後端服務
+
+**自動支援的功能**：
+- ✅ **Vercel 預覽部署**：所有 `*.vercel.app` 域名會自動被允許（包括 Pull Request 預覽）
+- ✅ **本地開發**：`localhost` 和 `127.0.0.1` 會自動被允許
+- ✅ **明確列出的域名**：`CORS_ORIGIN` 環境變數中列出的域名會被允許
 
 **如果出現 CORS 錯誤**：
 - 確認 `CORS_ORIGIN` 環境變數已設置且值正確
 - 確認前端 URL 與後端設置的 `CORS_ORIGIN` 完全匹配（包括 `https://` 協議）
+- **Vercel 預覽部署**：如果使用 Vercel 預覽 URL（`*.vercel.app`），應該自動被允許，無需額外配置
 - 清除瀏覽器快取並重新載入頁面
 - 檢查 Railway 部署日誌，確認環境變數已生效
 
@@ -141,6 +148,11 @@ Origin https://shopee2multi.vercel.app is not allowed by Access-Control-Allow-Or
 XMLHttpRequest cannot load https://shopee2multi-backend.railway.app/api/... due to access control checks
 ```
 
+或者 Vercel 預覽部署的錯誤：
+```
+Origin https://shopee2multi-[hash]-[team].vercel.app is not allowed by Access-Control-Allow-Origin
+```
+
 **原因**:
 - 後端的 `CORS_ORIGIN` 環境變數未設置或設置錯誤
 - 前端 URL 與後端設置的允許來源不匹配
@@ -165,6 +177,7 @@ XMLHttpRequest cannot load https://shopee2multi-backend.railway.app/api/... due 
 
 3. **重新部署後端**：
    - Railway 會在環境變數更改後自動重新部署
+   - **重要**：確保後端代碼已更新（支援 Vercel 預覽部署）
    - 等待部署完成（通常需要 1-2 分鐘）
 
 4. **驗證修復**：
@@ -178,10 +191,23 @@ XMLHttpRequest cannot load https://shopee2multi-backend.railway.app/api/... due 
    - 查看最新部署的日誌
    - 確認沒有 CORS 相關的警告訊息
 
+**自動支援的功能**（無需額外配置）：
+- ✅ **Vercel 預覽部署**：所有 `*.vercel.app` 域名會自動被允許
+  - 包括 Pull Request 預覽 URL（例如：`https://shopee2multi-b073wfn56-iamgjeks-projects.vercel.app`）
+  - 包括所有 Vercel 自動生成的預覽 URL
+- ✅ **本地開發**：`localhost` 和 `127.0.0.1` 會自動被允許
+- ✅ **明確列出的域名**：`CORS_ORIGIN` 環境變數中列出的域名會被允許
+
+**如果使用 Vercel 預覽部署**：
+- 如果後端代碼已更新（包含 Vercel 預覽支援），預覽 URL 會自動被允許
+- 如果仍出現 CORS 錯誤，確認後端已重新部署最新代碼
+- 檢查 Railway 部署日誌，確認後端服務正在運行最新版本
+
 **預防措施**:
 - 在部署前端之前，先設置後端的 `CORS_ORIGIN` 環境變數
 - 確保前端 URL 與後端設置的 `CORS_ORIGIN` 完全匹配
 - 在部署文檔中記錄正確的 CORS 配置步驟
+- 後端代碼已更新以自動支援 Vercel 預覽部署，無需額外配置
 
 ### 環境變數未生效
 
