@@ -30,3 +30,47 @@ body {
   display: inline-block !important;
   visibility: visible !important;
 }
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes speedSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* 確保動畫在元素進入視窗時觸發 */
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+}
+
+/* 滾動視差效果 */
+.parallax-section {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
