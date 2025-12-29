@@ -10,22 +10,20 @@ export default function Header() {
   const location = useLocation()
   const { token, user, clearAuth } = useAuthStore()
 
-  // Dark mode 主題色（黑/綠色）
+  // Dark mode 主題色（黑/綠色）- 統一風格
   const primaryColor = '#00ff88' // 亮綠色
   const darkBg = '#0a0a0a' // 深黑色背景
+  const darkCardBg = '#1a1a1a' // 卡片背景
   const darkText = '#ffffff' // 白色文字
   const darkTextSecondary = '#a0a0a0' // 次要文字
   const darkBorder = '#2a2a2a' // 邊框顏色
   
-  // 判斷是否在 Home 頁面
-  const isHomePage = location.pathname === '/'
-  
-  // 根據頁面選擇顏色
-  const headerBg = isHomePage ? 'rgba(10, 10, 10, 0.8)' : 'rgba(255, 255, 255, 0.8)'
-  const headerText = isHomePage ? darkText : '#212121'
-  const headerTextSecondary = isHomePage ? darkTextSecondary : '#757575'
-  const headerBorder = isHomePage ? darkBorder : 'rgba(0,0,0,0.05)'
-  const headerPrimaryColor = isHomePage ? primaryColor : '#1976d2'
+  // 所有頁面統一使用 dark mode
+  const headerBg = 'rgba(10, 10, 10, 0.8)'
+  const headerText = darkText
+  const headerTextSecondary = darkTextSecondary
+  const headerBorder = darkBorder
+  const headerPrimaryColor = primaryColor
 
   const handleLogout = () => {
     clearAuth()
@@ -48,7 +46,7 @@ export default function Header() {
     {
       key: 'email',
       label: (
-        <div style={{ padding: '4px 0', borderBottom: `1px solid ${isHomePage ? darkBorder : '#f0f0f0'}`, marginBottom: '8px' }}>
+        <div style={{ padding: '4px 0', borderBottom: `1px solid ${darkBorder}`, marginBottom: '8px' }}>
           <div style={{ fontSize: '14px', color: headerTextSecondary, marginBottom: '4px' }}>登入身分</div>
           <div style={{ fontSize: '15px', color: headerText, fontWeight: 500 }}>{user?.email}</div>
         </div>
@@ -98,7 +96,7 @@ export default function Header() {
       background: headerBg,
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
-      boxShadow: isHomePage ? '0 1px 0 rgba(255,255,255,0.05)' : '0 1px 0 rgba(0,0,0,0.05)',
+      boxShadow: '0 1px 0 rgba(255,255,255,0.05)',
       padding: '0 max(24px, calc((100vw - 1200px) / 2))',
       height: '64px',
       borderBottom: `1px solid ${headerBorder}`,
@@ -142,26 +140,14 @@ export default function Header() {
         >
           價格方案
         </a>
-        {token && (
-          <>
-            <Link 
-              to="/converter" 
-              style={navLinkStyle(location.pathname === '/converter')}
-              onMouseOver={(e) => { if (location.pathname !== '/converter') e.currentTarget.style.color = headerText }}
-              onMouseOut={(e) => { if (location.pathname !== '/converter') e.currentTarget.style.color = headerTextSecondary }}
-            >
-              轉檔工具
-            </Link>
-            <Link 
-              to="/dashboard" 
-              style={navLinkStyle(location.pathname === '/dashboard')}
-              onMouseOver={(e) => { if (location.pathname !== '/dashboard') e.currentTarget.style.color = headerText }}
-              onMouseOut={(e) => { if (location.pathname !== '/dashboard') e.currentTarget.style.color = headerTextSecondary }}
-            >
-              儀表板
-            </Link>
-          </>
-        )}
+        <Link 
+          to={token ? "/converter" : "/login"} 
+          style={navLinkStyle(location.pathname === '/converter' || location.pathname === '/login')}
+          onMouseOver={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerText }}
+          onMouseOut={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerTextSecondary }}
+        >
+          轉檔工具
+        </Link>
       </nav>
 
       {/* Right Section */}
@@ -177,7 +163,7 @@ export default function Header() {
               borderRadius: '20px',
               transition: 'background 0.2s ease'
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = isHomePage ? 'rgba(255,255,255,0.1)' : '#f5f5f5'}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
             >
               <Avatar 
@@ -188,13 +174,13 @@ export default function Header() {
                   fontSize: '14px'
                 }}
               />
-              {user?.plan && (
+              {user?.email && (
                 <span style={{ 
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: user.plan === 'free' ? headerTextSecondary : headerPrimaryColor
+                  color: headerTextSecondary
                 }}>
-                  {getPlanName()}
+                  {user.email}
                 </span>
               )}
             </div>
@@ -223,14 +209,14 @@ export default function Header() {
               style={{
                 background: headerPrimaryColor,
                 border: 'none',
-                color: isHomePage ? darkBg : '#ffffff',
+                color: darkBg,
                 fontSize: '15px',
                 fontWeight: 500,
                 padding: '8px 20px',
                 borderRadius: '18px',
                 cursor: 'pointer',
                 transition: 'opacity 0.2s ease',
-                boxShadow: isHomePage ? '0 4px 16px rgba(0, 255, 136, 0.3)' : 'none'
+                boxShadow: '0 4px 16px rgba(0, 255, 136, 0.3)'
               }}
               onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
               onMouseOut={(e) => e.currentTarget.style.opacity = '1'}

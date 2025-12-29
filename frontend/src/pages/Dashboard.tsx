@@ -20,11 +20,13 @@ export default function Dashboard() {
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  // 深藍色主題色（Material Design Blue 700）
-  const primaryColor = '#1976d2'
-  const darkGray = '#212121'
-  const mediumGray = '#757575'
-  const lightGray = '#fafafa'
+  // Dark mode 主題色（黑/綠色）
+  const primaryColor = '#00ff88' // 亮綠色
+  const darkBg = '#0a0a0a' // 深黑色背景
+  const darkCardBg = '#1a1a1a' // 卡片背景
+  const darkText = '#ffffff' // 白色文字
+  const darkTextSecondary = '#a0a0a0' // 次要文字
+  const darkBorder = '#2a2a2a' // 邊框顏色
 
   useEffect(() => {
     loadData()
@@ -62,7 +64,7 @@ export default function Dashboard() {
       dataIndex: 'created_at',
       key: 'created_at',
       render: (text: string) => (
-        <Text style={{ fontSize: '15px', color: darkGray }}>
+        <Text style={{ fontSize: '15px', color: darkText }}>
           {new Date(text).toLocaleString('zh-TW')}
         </Text>
       )
@@ -73,7 +75,7 @@ export default function Dashboard() {
       key: 'source_url',
       ellipsis: true,
       render: (text: string) => (
-        <Text style={{ fontSize: '15px', color: mediumGray }}>
+        <Text style={{ fontSize: '15px', color: darkTextSecondary }}>
           {text}
         </Text>
       )
@@ -161,7 +163,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ 
-      background: '#ffffff', 
+      background: darkBg, 
       minHeight: 'calc(100vh - 112px)',
       padding: '60px 24px'
     }}>
@@ -173,14 +175,14 @@ export default function Dashboard() {
             style={{ 
               fontSize: '48px',
               fontWeight: 600,
-              color: darkGray,
+              color: darkText,
               marginBottom: '8px',
               letterSpacing: '-1px'
             }}
           >
             儀表板
           </Title>
-          <Text style={{ fontSize: '17px', color: mediumGray }}>
+          <Text style={{ fontSize: '17px', color: darkTextSecondary }}>
             查看你的轉檔統計與歷史記錄
           </Text>
         </div>
@@ -192,7 +194,8 @@ export default function Dashboard() {
               bordered={false}
               style={{
                 borderRadius: '24px',
-                background: lightGray,
+                background: darkCardBg,
+                border: `1px solid ${darkBorder}`,
                 height: '100%'
               }}
               bodyStyle={{ padding: '32px' }}
@@ -203,7 +206,7 @@ export default function Dashboard() {
               <Text style={{ 
                 display: 'block',
                 fontSize: '15px',
-                color: mediumGray,
+                color: darkTextSecondary,
                 marginBottom: '8px'
               }}>
                 今日轉檔數
@@ -212,14 +215,14 @@ export default function Dashboard() {
                 <span style={{ 
                   fontSize: '48px',
                   fontWeight: 700,
-                  color: darkGray,
+                  color: darkText,
                   lineHeight: '1'
                 }}>
                   {profile?.usage?.daily || 0}
                 </span>
                 <span style={{ 
                   fontSize: '24px',
-                  color: mediumGray,
+                  color: darkTextSecondary,
                   marginLeft: '8px'
                 }}>
                   / {profile?.usage?.limit || 10}
@@ -233,7 +236,8 @@ export default function Dashboard() {
               bordered={false}
               style={{
                 borderRadius: '24px',
-                background: user?.plan !== 'free' ? primaryColor : lightGray,
+                background: user?.plan !== 'free' ? `linear-gradient(135deg, ${primaryColor} 0%, #00cc6a 100%)` : darkCardBg,
+                border: user?.plan !== 'free' ? 'none' : `1px solid ${darkBorder}`,
                 height: '100%',
                 cursor: user?.plan === 'free' ? 'pointer' : 'default'
               }}
@@ -250,13 +254,13 @@ export default function Dashboard() {
               <div style={{ marginBottom: '12px' }}>
                 <CrownOutlined style={{ 
                   fontSize: '32px', 
-                  color: user?.plan !== 'free' ? '#ffffff' : primaryColor 
+                  color: user?.plan !== 'free' ? darkBg : primaryColor 
                 }} />
               </div>
               <Text style={{ 
                 display: 'block',
                 fontSize: '15px',
-                color: user?.plan !== 'free' ? 'rgba(255,255,255,0.85)' : mediumGray,
+                color: user?.plan !== 'free' ? 'rgba(10, 10, 10, 0.7)' : darkTextSecondary,
                 marginBottom: '8px'
               }}>
                 目前方案
@@ -264,7 +268,7 @@ export default function Dashboard() {
               <div style={{ 
                 fontSize: '36px',
                 fontWeight: 700,
-                color: user?.plan !== 'free' ? '#ffffff' : darkGray,
+                color: user?.plan !== 'free' ? darkBg : darkText,
                 lineHeight: '1',
                 marginBottom: user?.plan === 'free' ? '12px' : 0
               }}>
@@ -287,18 +291,19 @@ export default function Dashboard() {
               bordered={false}
               style={{
                 borderRadius: '24px',
-                background: lightGray,
+                background: darkCardBg,
+                border: `1px solid ${darkBorder}`,
                 height: '100%'
               }}
               bodyStyle={{ padding: '32px' }}
             >
               <div style={{ marginBottom: '12px' }}>
-                <CheckCircleOutlined style={{ fontSize: '32px', color: '#52c41a' }} />
+                <CheckCircleOutlined style={{ fontSize: '32px', color: primaryColor }} />
               </div>
               <Text style={{ 
                 display: 'block',
                 fontSize: '15px',
-                color: mediumGray,
+                color: darkTextSecondary,
                 marginBottom: '8px'
               }}>
                 總轉檔次數
@@ -306,7 +311,7 @@ export default function Dashboard() {
               <div style={{ 
                 fontSize: '48px',
                 fontWeight: 700,
-                color: darkGray,
+                color: darkText,
                 lineHeight: '1'
               }}>
                 {history.length}
@@ -320,8 +325,9 @@ export default function Dashboard() {
           bordered={false}
           style={{
             borderRadius: '24px',
-            background: '#ffffff',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.08)'
+            background: darkCardBg,
+            border: `1px solid ${darkBorder}`,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
           }}
           bodyStyle={{ padding: '32px' }}
         >
@@ -330,7 +336,7 @@ export default function Dashboard() {
             style={{ 
               fontSize: '28px',
               fontWeight: 600,
-              color: darkGray,
+              color: darkText,
               marginBottom: '24px'
             }}
           >

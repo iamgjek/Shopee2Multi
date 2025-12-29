@@ -14,9 +14,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Layout style={{ minHeight: '100vh', background: '#ffffff' }}>
+      <Layout style={{ minHeight: '100vh', background: '#0a0a0a' }}>
         <Header />
-        <Layout.Content style={{ background: '#ffffff' }}>
+        <Layout.Content style={{ background: '#0a0a0a' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/pricing" element={<Navigate to="/" replace />} />

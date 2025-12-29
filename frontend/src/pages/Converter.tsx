@@ -24,11 +24,13 @@ export default function Converter() {
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // 深藍色主題色（Material Design Blue 700）
-  const primaryColor = '#1976d2'
-  const darkGray = '#212121'
-  const mediumGray = '#757575'
-  const lightGray = '#fafafa'
+  // Dark mode 主題色（黑/綠色）
+  const primaryColor = '#00ff88' // 亮綠色
+  const darkBg = '#0a0a0a' // 深黑色背景
+  const darkCardBg = '#1a1a1a' // 卡片背景
+  const darkText = '#ffffff' // 白色文字
+  const darkTextSecondary = '#a0a0a0' // 次要文字
+  const darkBorder = '#2a2a2a' // 邊框顏色
 
   const handleConvert = async () => {
     if (!url.trim()) {
@@ -62,7 +64,7 @@ export default function Converter() {
 
   return (
     <div style={{ 
-      background: '#ffffff', 
+      background: darkBg, 
       minHeight: 'calc(100vh - 112px)',
       padding: '60px 24px'
     }}>
@@ -74,7 +76,7 @@ export default function Converter() {
             style={{ 
               fontSize: '48px',
               fontWeight: 600,
-              color: darkGray,
+              color: darkText,
               marginBottom: '16px',
               letterSpacing: '-1px'
             }}
@@ -83,7 +85,7 @@ export default function Converter() {
           </Title>
           <Paragraph style={{ 
             fontSize: '21px',
-            color: mediumGray,
+            color: darkTextSecondary,
             lineHeight: '1.6',
             marginBottom: 0
           }}>
@@ -96,8 +98,9 @@ export default function Converter() {
           bordered={false}
           style={{
             borderRadius: '24px',
-            background: '#ffffff',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.08)',
+            background: darkCardBg,
+            border: `1px solid ${darkBorder}`,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
             marginBottom: '32px'
           }}
           bodyStyle={{ padding: '48px' }}
@@ -109,7 +112,7 @@ export default function Converter() {
                 display: 'block',
                 fontSize: '17px',
                 fontWeight: 500,
-                color: darkGray,
+                color: darkText,
                 marginBottom: '12px'
               }}>
                 蝦皮商品連結
@@ -123,7 +126,9 @@ export default function Converter() {
                 style={{
                   fontSize: '16px',
                   borderRadius: '12px',
-                  borderColor: '#e0e0e0',
+                  borderColor: darkBorder,
+                  background: darkBg,
+                  color: darkText,
                   padding: '16px'
                 }}
               />
@@ -135,7 +140,7 @@ export default function Converter() {
                 display: 'block',
                 fontSize: '17px',
                 fontWeight: 500,
-                color: darkGray,
+                color: darkText,
                 marginBottom: '12px'
               }}>
                 目標平台
@@ -174,17 +179,18 @@ export default function Converter() {
               onClick={handleConvert}
               loading={loading}
               block
-              style={{
-                height: '56px',
-                fontSize: '17px',
-                fontWeight: 500,
-                borderRadius: '28px',
-                background: primaryColor,
-                borderColor: primaryColor,
-                boxShadow: 'none',
-                border: 'none',
-                marginTop: '8px'
-              }}
+                  style={{
+                    height: '56px',
+                    fontSize: '17px',
+                    fontWeight: 500,
+                    borderRadius: '28px',
+                    background: primaryColor,
+                    borderColor: primaryColor,
+                    color: darkBg,
+                    boxShadow: '0 4px 20px rgba(0, 255, 136, 0.4)',
+                    border: 'none',
+                    marginTop: '8px'
+                  }}
             >
               {loading ? '轉檔中...' : '開始轉檔'}
             </Button>
@@ -197,7 +203,8 @@ export default function Converter() {
             bordered={false}
             style={{
               borderRadius: '24px',
-              background: lightGray,
+              background: darkCardBg,
+              border: `1px solid ${darkBorder}`,
               textAlign: 'center'
             }}
             bodyStyle={{ padding: '48px' }}
@@ -206,7 +213,7 @@ export default function Converter() {
             <Paragraph style={{ 
               marginTop: '24px',
               fontSize: '17px',
-              color: mediumGray,
+              color: darkTextSecondary,
               marginBottom: 0
             }}>
               正在解析商品資訊並轉換格式...
@@ -220,8 +227,9 @@ export default function Converter() {
             bordered={false}
             style={{
               borderRadius: '24px',
-              background: '#ffffff',
-              boxShadow: '0 2px 16px rgba(0, 0, 0, 0.08)',
+              background: darkCardBg,
+              border: `1px solid ${darkBorder}`,
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
               textAlign: 'center'
             }}
             bodyStyle={{ padding: '48px' }}
@@ -230,7 +238,7 @@ export default function Converter() {
               width: '80px',
               height: '80px',
               borderRadius: '40px',
-              background: '#f0f9ff',
+              background: `${primaryColor}20`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -247,7 +255,7 @@ export default function Converter() {
               style={{ 
                 fontSize: '32px',
                 fontWeight: 600,
-                color: darkGray,
+                color: darkText,
                 marginBottom: '12px'
               }}
             >
@@ -256,7 +264,7 @@ export default function Converter() {
 
             <Paragraph style={{ 
               fontSize: '17px',
-              color: mediumGray,
+              color: darkTextSecondary,
               marginBottom: '32px'
             }}>
               商品已成功轉換為目標平台格式
@@ -264,35 +272,36 @@ export default function Converter() {
 
             {/* 商品資訊 */}
             <div style={{
-              background: lightGray,
+              background: darkBg,
               borderRadius: '16px',
               padding: '24px',
               marginBottom: '32px',
-              textAlign: 'left'
+              textAlign: 'left',
+              border: `1px solid ${darkBorder}`
             }}>
               <div style={{ marginBottom: '16px' }}>
-                <Text style={{ fontSize: '15px', color: mediumGray, display: 'block', marginBottom: '4px' }}>
+                <Text style={{ fontSize: '15px', color: darkTextSecondary, display: 'block', marginBottom: '4px' }}>
                   商品名稱
                 </Text>
-                <Text style={{ fontSize: '17px', color: darkGray, fontWeight: 500 }}>
+                <Text style={{ fontSize: '17px', color: darkText, fontWeight: 500 }}>
                   {result.product?.title || 'N/A'}
                 </Text>
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <Text style={{ fontSize: '15px', color: mediumGray, display: 'block', marginBottom: '4px' }}>
+                <Text style={{ fontSize: '15px', color: darkTextSecondary, display: 'block', marginBottom: '4px' }}>
                   售價
                 </Text>
-                <Text style={{ fontSize: '17px', color: darkGray, fontWeight: 500 }}>
+                <Text style={{ fontSize: '17px', color: darkText, fontWeight: 500 }}>
                   NT$ {result.product?.price || 'N/A'}
                 </Text>
               </div>
 
               <div>
-                <Text style={{ fontSize: '15px', color: mediumGray, display: 'block', marginBottom: '4px' }}>
+                <Text style={{ fontSize: '15px', color: darkTextSecondary, display: 'block', marginBottom: '4px' }}>
                   任務 ID
                 </Text>
-                <Text style={{ fontSize: '15px', color: mediumGray, fontFamily: 'monospace' }}>
+                <Text style={{ fontSize: '15px', color: darkTextSecondary, fontFamily: 'monospace' }}>
                   {result.taskId}
                 </Text>
               </div>
@@ -312,7 +321,8 @@ export default function Converter() {
                 borderRadius: '28px',
                 background: primaryColor,
                 borderColor: primaryColor,
-                boxShadow: 'none',
+                color: darkBg,
+                boxShadow: '0 4px 20px rgba(0, 255, 136, 0.4)',
                 border: 'none'
               }}
             >

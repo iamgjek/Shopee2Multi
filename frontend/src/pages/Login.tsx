@@ -13,10 +13,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 深藍色主題色（Material Design Blue 700）
-  const primaryColor = '#1976d2'
-  const darkGray = '#212121'
-  const mediumGray = '#757575'
+  // Dark mode 主題色（黑/綠色）
+  const primaryColor = '#00ff88' // 亮綠色
+  const darkBg = '#0a0a0a' // 深黑色背景
+  const darkCardBg = '#1a1a1a' // 卡片背景
+  const darkText = '#ffffff' // 白色文字
+  const darkTextSecondary = '#a0a0a0' // 次要文字
+  const darkBorder = '#2a2a2a' // 邊框顏色
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true)
@@ -36,7 +39,7 @@ export default function Login() {
 
   return (
     <div style={{ 
-      background: '#ffffff',
+      background: darkBg,
       minHeight: 'calc(100vh - 112px)',
       display: 'flex',
       alignItems: 'center',
@@ -48,8 +51,9 @@ export default function Login() {
           bordered={false}
           style={{
             borderRadius: '24px',
-            background: '#ffffff',
-            boxShadow: '0 2px 16px rgba(0, 0, 0, 0.08)'
+            background: darkCardBg,
+            border: `1px solid ${darkBorder}`,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
           }}
           bodyStyle={{ padding: '48px' }}
         >
@@ -61,7 +65,7 @@ export default function Login() {
                 style={{ 
                   fontSize: '36px',
                   fontWeight: 600,
-                  color: darkGray,
+                  color: darkText,
                   marginBottom: '12px',
                   letterSpacing: '-0.5px'
                 }}
@@ -70,7 +74,7 @@ export default function Login() {
               </Title>
               <Text style={{ 
                 fontSize: '17px',
-                color: mediumGray
+                color: darkTextSecondary
               }}>
                 登入您的 Shopee2Multi 帳號
               </Text>
@@ -103,13 +107,15 @@ export default function Login() {
                 ]}
               >
                 <Input
-                  prefix={<UserOutlined style={{ color: mediumGray }} />}
+                  prefix={<UserOutlined style={{ color: darkTextSecondary }} />}
                   placeholder="電子郵件"
                   style={{
                     height: '48px',
                     fontSize: '16px',
                     borderRadius: '12px',
-                    borderColor: '#e0e0e0'
+                    borderColor: darkBorder,
+                    background: darkBg,
+                    color: darkText
                   }}
                 />
               </Form.Item>
@@ -120,13 +126,15 @@ export default function Login() {
                 style={{ marginBottom: '32px' }}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: mediumGray }} />}
+                  prefix={<LockOutlined style={{ color: darkTextSecondary }} />}
                   placeholder="密碼"
                   style={{
                     height: '48px',
                     fontSize: '16px',
                     borderRadius: '12px',
-                    borderColor: '#e0e0e0'
+                    borderColor: darkBorder,
+                    background: darkBg,
+                    color: darkText
                   }}
                 />
               </Form.Item>
@@ -144,7 +152,8 @@ export default function Login() {
                     borderRadius: '28px',
                     background: primaryColor,
                     borderColor: primaryColor,
-                    boxShadow: 'none',
+                    color: darkBg,
+                    boxShadow: '0 4px 20px rgba(0, 255, 136, 0.4)',
                     border: 'none'
                   }}
                 >
@@ -155,7 +164,7 @@ export default function Login() {
 
             {/* 註冊連結 */}
             <div style={{ textAlign: 'center' }}>
-              <Text style={{ fontSize: '16px', color: mediumGray }}>
+              <Text style={{ fontSize: '16px', color: darkTextSecondary }}>
                 還沒有帳號？{' '}
                 <Link 
                   to="/register"
