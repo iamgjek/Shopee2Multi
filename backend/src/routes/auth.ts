@@ -1,5 +1,5 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { UserModel } from '../models/User';
 import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
@@ -33,11 +33,13 @@ router.post('/register', async (req, res, next) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const signOptions: SignOptions = {
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    };
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
       jwtSecret,
-      { expiresIn: jwtExpiresIn }
+      signOptions
     );
 
     res.json({
@@ -76,11 +78,13 @@ router.post('/login', async (req, res, next) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const signOptions: SignOptions = {
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    };
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
       jwtSecret,
-      { expiresIn: jwtExpiresIn }
+      signOptions
     );
 
     res.json({
