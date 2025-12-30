@@ -41,7 +41,35 @@ const isOriginAllowed = (origin: string): boolean => {
   return false;
 };
 
-// CORS middleware - MUST be before helmet to prevent header conflicts
+// Manual CORS middleware - runs first to ensure headers are set
+// This is a backup in case the cors library doesn't work correctly with Railway
+app.use((req, res, next) => {
+  const origin = req.headers.origin as string | undefined;
+  
+  if (origin && isOriginAllowed(origin)) {
+    // Explicitly set CORS headers to prevent Railway from overriding
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    
+    // Handle preflight requests immediately
+    if (req.method === 'OPTIONS') {
+      console.log(`✅ CORS preflight allowed for origin: ${origin}`);
+      return res.status(204).end();
+    }
+    
+    console.log(`✅ CORS headers set for origin: ${origin}`);
+  } else if (origin) {
+    console.warn(`⚠️  CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
+  }
+  
+  next();
+});
+
+// CORS middleware using cors library (as additional layer)
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -51,11 +79,8 @@ app.use(cors({
     
     if (isOriginAllowed(origin)) {
       // Explicitly return the origin value to ensure correct CORS header
-      // This prevents Railway or other proxies from overriding it
-      console.log(`✅ CORS allowed for origin: ${origin}`);
       callback(null, origin);
     } else {
-      console.warn(`⚠️  CORS blocked: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -63,7 +88,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Type', 'Authorization'],
-  // Ensure preflight requests are handled correctly
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
