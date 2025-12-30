@@ -93,6 +93,22 @@ git push origin main
 
 在後端服務的 Variables 標籤中添加：
 
+**方法 1: 使用 DATABASE_URL（推薦，Railway 自動提供）**
+
+當您在 Railway 中添加 PostgreSQL 資料庫時，Railway 會自動創建 `DATABASE_URL` 環境變數。您只需要在後端服務的 Variables 中添加：
+
+```env
+NODE_ENV=production
+PORT=3001
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=7d
+CORS_ORIGIN=https://shopee2multi.vercel.app
+```
+
+**方法 2: 使用單獨的環境變數**
+
+如果 Railway 沒有自動提供 `DATABASE_URL`，您可以手動設置：
+
 ```env
 NODE_ENV=production
 PORT=3001
@@ -109,6 +125,7 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 **重要**: 
 - `JWT_SECRET` 請使用強隨機字串（可使用 `openssl rand -base64 32` 生成）
 - `CORS_ORIGIN` 稍後部署前端後再更新
+- Railway 通常會自動提供 `DATABASE_URL`，無需手動設置資料庫連接資訊
 
 ### 步驟 6: 執行資料庫遷移
 
@@ -134,12 +151,12 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
    - **Output Directory**: `dist`（自動偵測）
 5. 在 Environment Variables 中添加：
    ```
-   VITE_API_URL=https://your-backend.railway.app
+   VITE_API_URL=https://shopee2multi-backend.railway.app
    ```
    （將 `your-backend.railway.app` 替換為 Railway 提供的後端 URL）
 6. 點擊 "Deploy"
 
-部署完成後，Vercel 會提供一個 URL（例如：`https://your-project.vercel.app`）
+部署完成後，Vercel 會提供一個 URL（例如：`https://shopee2multi.vercel.app`）
 
 #### 選項 B: 使用 Railway
 
@@ -151,7 +168,7 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
    - Start Command: `npm run preview`
 5. 在 Variables 中添加：
    ```
-   VITE_API_URL=https://your-backend.railway.app
+   VITE_API_URL=https://shopee2multi-backend.railway.app
    ```
 
 ### 步驟 8: 更新 CORS 設定
@@ -159,7 +176,7 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 部署前端後，更新後端的 `CORS_ORIGIN` 環境變數：
 
 1. 在 Railway 後端服務的 Variables 中
-2. 更新 `CORS_ORIGIN` 為您的前端 URL（例如：`https://your-project.vercel.app`）
+2. 更新 `CORS_ORIGIN` 為您的前端 URL（例如：`https://shopee2multi.vercel.app`）
 3. Railway 會自動重新部署
 
 ---
@@ -195,7 +212,7 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
    - Publish Directory: `dist`
 4. 添加環境變數：
    ```
-   VITE_API_URL=https://your-backend.onrender.com
+   VITE_API_URL=https://shopee2multi-backend.railway.app
    ```
 
 ---
@@ -210,7 +227,7 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 4. Vercel 會自動偵測 Vite 配置
 5. 添加環境變數：
    ```
-   VITE_API_URL=https://your-backend-url
+   VITE_API_URL=https://shopee2multi-backend.railway.app
    ```
 
 ### 後端部署
@@ -256,9 +273,13 @@ npm run migrate
 ## 故障排除
 
 ### 後端無法連接資料庫
-- 檢查環境變數是否正確
-- 確認資料庫服務正在運行
-- 檢查防火牆設定
+- **檢查環境變數**：
+  - Railway 通常會自動提供 `DATABASE_URL` 環境變數
+  - 如果沒有，檢查是否設置了 `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+  - 或者檢查 Railway 的 `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` 環境變數
+- **確認資料庫服務正在運行**：在 Railway 專案中確認 PostgreSQL 服務狀態
+- **檢查資料庫連接**：在 Railway 後端服務的終端執行 `npm run migrate` 測試連接
+- **Railway 特定**：確保後端服務已連接到 PostgreSQL 資料庫服務（在 Railway 專案中檢查服務之間的連接）
 
 ### 前端無法連接後端
 - 檢查 `VITE_API_URL` 環境變數
