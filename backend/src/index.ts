@@ -15,10 +15,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(helmet());
-
 // CORS configuration - support multiple origins and Vercel preview deployments
+// MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
 const allowedOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173'];
@@ -43,15 +41,19 @@ const isOriginAllowed = (origin: string): boolean => {
   return false;
 };
 
+// CORS middleware - MUST be before helmet to prevent header conflicts
 app.use(cors({
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
       return callback(null, true);
     }
     
     if (isOriginAllowed(origin)) {
-      callback(null, true);
+      // Explicitly return the origin value to ensure correct CORS header
+      // This prevents Railway or other proxies from overriding it
+      console.log(`✅ CORS allowed for origin: ${origin}`);
+      callback(null, origin);
     } else {
       console.warn(`⚠️  CORS blocked: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
       callback(new Error('Not allowed by CORS'));
@@ -59,8 +61,20 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  // Ensure preflight requests are handled correctly
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// Middleware - Configure helmet to not interfere with CORS
+// Placed AFTER CORS to ensure CORS headers are not overridden
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
