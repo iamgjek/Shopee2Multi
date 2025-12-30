@@ -33,13 +33,11 @@ router.post('/register', async (req, res, next) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
-    const signOptions: SignOptions = {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-    };
+    const expiresIn = (process.env.JWT_EXPIRES_IN || '7d') as string | number;
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
       jwtSecret,
-      signOptions
+      { expiresIn }
     );
 
     res.json({
@@ -78,13 +76,11 @@ router.post('/login', async (req, res, next) => {
 
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
-    const signOptions: SignOptions = {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-    };
+    const expiresIn = (process.env.JWT_EXPIRES_IN || '7d') as string | number;
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
       jwtSecret,
-      signOptions
+      { expiresIn }
     );
 
     res.json({
