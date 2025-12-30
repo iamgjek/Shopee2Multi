@@ -32,10 +32,12 @@ router.post('/register', async (req, res, next) => {
     const user = await UserModel.create(email, password, name);
 
     // Generate JWT
+    const jwtSecret = process.env.JWT_SECRET || 'secret';
+    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      jwtSecret,
+      { expiresIn: jwtExpiresIn }
     );
 
     res.json({
@@ -73,10 +75,12 @@ router.post('/login', async (req, res, next) => {
     }
 
     // Generate JWT
+    const jwtSecret = process.env.JWT_SECRET || 'secret';
+    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
     const token = jwt.sign(
       { id: user.id, email: user.email, plan: user.plan },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      jwtSecret,
+      { expiresIn: jwtExpiresIn }
     );
 
     res.json({
