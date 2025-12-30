@@ -56,16 +56,18 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
-// Test connection
+// Test connection (non-blocking - won't prevent server from starting)
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('❌ Database connection failed:', err.message);
+    console.error('⚠️  Server will continue running, but database operations may fail');
     if ('connectionString' in dbConfig) {
       console.error('📋 Using DATABASE_URL connection string');
       console.error('💡 Troubleshooting:');
       console.error('   1. 檢查 DATABASE_URL 環境變數是否正確設置');
       console.error('   2. 確認資料庫服務正在運行');
       console.error('   3. 確認資料庫連接字串格式正確');
+      console.error('   4. 在 Railway 上，確保資料庫服務已連接到後端服務');
     } else {
       console.error('📋 Connection details:');
       console.error(`   Host: ${dbConfig.host}`);

@@ -133,12 +133,34 @@ app.get('/api/cors-test', (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server with error handling
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS Configuration:`);
   console.log(`   - Allowed origins from env: ${allowedOrigins.join(', ') || 'none'}`);
   console.log(`   - Auto-allowing: *.vercel.app, localhost`);
   console.log(`   - Test endpoint: /api/cors-test`);
+});
+
+// Handle server errors
+server.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use`);
+  } else {
+    console.error('❌ Server error:', err);
+  }
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  // Don't exit immediately, allow graceful shutdown
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit immediately, allow graceful shutdown
 });
