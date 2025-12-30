@@ -37,14 +37,14 @@ export class ShopeeParser {
 
   async parseProduct(url: string): Promise<ShopeeProduct> {
     await this.init();
-    const page = await this.browser!.newPage();
+    
+    // Create context with user agent
+    const context = await this.browser!.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    });
+    const page = await context.newPage();
 
     try {
-      // Set user agent to avoid detection
-      await page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      );
-
       await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
 
       // Wait for product data to load
@@ -119,6 +119,7 @@ export class ShopeeParser {
       throw new Error(`Failed to parse Shopee product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       await page.close();
+      await context.close();
     }
   }
 
