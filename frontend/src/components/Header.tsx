@@ -13,7 +13,6 @@ export default function Header() {
   // Dark mode 主題色（黑/綠色）- 統一風格
   const primaryColor = '#00ff88' // 亮綠色
   const darkBg = '#0a0a0a' // 深黑色背景
-  const darkCardBg = '#1a1a1a' // 卡片背景
   const darkText = '#ffffff' // 白色文字
   const darkTextSecondary = '#a0a0a0' // 次要文字
   const darkBorder = '#2a2a2a' // 邊框顏色
@@ -68,13 +67,6 @@ export default function Header() {
       onClick: handleLogout,
     },
   ]
-
-  const getPlanName = () => {
-    if (user?.plan === 'free') return '免費版'
-    if (user?.plan === 'pro') return 'Pro'
-    if (user?.plan === 'biz') return 'Biz'
-    return '免費版'
-  }
 
   const navLinkStyle = (isActive: boolean) => ({
     color: isActive ? headerText : headerTextSecondary,

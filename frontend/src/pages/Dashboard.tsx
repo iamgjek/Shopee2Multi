@@ -118,7 +118,7 @@ export default function Dashboard() {
           completed: { color: '#52c41a', bg: '#52c41a15', icon: <CheckCircleOutlined />, text: '完成' },
           failed: { color: '#ff4d4f', bg: '#ff4d4f15', icon: <CloseCircleOutlined />, text: '失敗' },
           processing: { color: primaryColor, bg: `${primaryColor}15`, icon: <ThunderboltOutlined />, text: '處理中' },
-          pending: { color: mediumGray, bg: `${mediumGray}15`, icon: null, text: '等待中' }
+          pending: { color: darkTextSecondary, bg: `${darkTextSecondary}15`, icon: null, text: '等待中' }
         }
         const config = statusConfig[status] || statusConfig.pending
         return (
