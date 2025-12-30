@@ -3,11 +3,20 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// 調試：顯示可用的環境變數（不顯示敏感信息）
+console.log('🔍 Database connection configuration:');
+console.log(`   DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Set' : '❌ Not set'}`);
+console.log(`   PGHOST: ${process.env.PGHOST || 'Not set'}`);
+console.log(`   DB_HOST: ${process.env.DB_HOST || 'Not set'}`);
+console.log(`   PGDATABASE: ${process.env.PGDATABASE || 'Not set'}`);
+console.log(`   DB_NAME: ${process.env.DB_NAME || 'Not set'}`);
+
 // 支援 DATABASE_URL（Railway 等平台常用）或單獨的環境變數
 let dbConfig;
 
 if (process.env.DATABASE_URL) {
   // 使用 DATABASE_URL 連接字串
+  console.log('📝 Using DATABASE_URL for connection');
   dbConfig = {
     connectionString: process.env.DATABASE_URL,
     max: 20,
@@ -16,12 +25,25 @@ if (process.env.DATABASE_URL) {
   };
 } else {
   // 使用單獨的環境變數（也支援 Railway 的 PGHOST 等）
+  const host = process.env.DB_HOST || process.env.PGHOST || 'localhost';
+  const port = parseInt(process.env.DB_PORT || process.env.PGPORT || '5432');
+  const database = process.env.DB_NAME || process.env.PGDATABASE || 'shopee2multi';
+  const user = process.env.DB_USER || process.env.PGUSER || 'user';
+  const password = process.env.DB_PASSWORD || process.env.PGPASSWORD || 'password';
+  
+  console.log('📝 Using individual environment variables for connection');
+  console.log(`   Host: ${host}`);
+  console.log(`   Port: ${port}`);
+  console.log(`   Database: ${database}`);
+  console.log(`   User: ${user}`);
+  console.log(`   Password: ${password ? '✅ Set' : '❌ Not set'}`);
+  
   dbConfig = {
-    host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || process.env.PGPORT || '5432'),
-    database: process.env.DB_NAME || process.env.PGDATABASE || 'shopee2multi',
-    user: process.env.DB_USER || process.env.PGUSER || 'user',
-    password: process.env.DB_PASSWORD || process.env.PGPASSWORD || 'password',
+    host,
+    port,
+    database,
+    user,
+    password,
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,

@@ -86,16 +86,19 @@ git push origin main
 
 1. 在 Railway 專案中點擊 "New" → "Database" → "PostgreSQL"
 2. Railway 會自動創建資料庫
-3. 點擊資料庫服務，進入 Variables 標籤
-4. 複製資料庫連接資訊（`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`）
+3. **重要**：確保後端服務已連接到資料庫服務
+   - 在 Railway 專案中，點擊後端服務
+   - 進入 Settings → Variables
+   - 檢查是否有 `DATABASE_URL` 或 `PGHOST`, `PGPORT` 等環境變數
+   - 如果沒有，點擊資料庫服務 → Settings → Connect，選擇後端服務
 
 ### 步驟 5: 設定後端環境變數
 
 在後端服務的 Variables 標籤中添加：
 
-**方法 1: 使用 DATABASE_URL（推薦，Railway 自動提供）**
+**方法 1: 使用 DATABASE_URL（推薦）**
 
-當您在 Railway 中添加 PostgreSQL 資料庫時，Railway 會自動創建 `DATABASE_URL` 環境變數。您只需要在後端服務的 Variables 中添加：
+Railway 通常會自動提供 `DATABASE_URL` 環境變數。檢查後端服務的 Variables 標籤，如果已有 `DATABASE_URL`，只需添加：
 
 ```env
 NODE_ENV=production
@@ -107,16 +110,25 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 
 **方法 2: 使用單獨的環境變數**
 
-如果 Railway 沒有自動提供 `DATABASE_URL`，您可以手動設置：
+如果 Railway 沒有自動提供 `DATABASE_URL`，您可以手動設置。在後端服務的 Variables 標籤中：
+
+1. 點擊資料庫服務 → Variables 標籤
+2. 複製以下環境變數的值：
+   - `PGHOST`
+   - `PGPORT`
+   - `PGDATABASE`
+   - `PGUSER`
+   - `PGPASSWORD`
+3. 在後端服務的 Variables 中添加：
 
 ```env
 NODE_ENV=production
 PORT=3001
-DB_HOST=${PGHOST}
-DB_PORT=${PGPORT}
-DB_NAME=${PGDATABASE}
-DB_USER=${PGUSER}
-DB_PASSWORD=${PGPASSWORD}
+DB_HOST=<從資料庫服務複製的 PGHOST 值>
+DB_PORT=<從資料庫服務複製的 PGPORT 值>
+DB_NAME=<從資料庫服務複製的 PGDATABASE 值>
+DB_USER=<從資料庫服務複製的 PGUSER 值>
+DB_PASSWORD=<從資料庫服務複製的 PGPASSWORD 值>
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
 CORS_ORIGIN=https://shopee2multi.vercel.app
@@ -125,7 +137,8 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 **重要**: 
 - `JWT_SECRET` 請使用強隨機字串（可使用 `openssl rand -base64 32` 生成）
 - `CORS_ORIGIN` 稍後部署前端後再更新
-- Railway 通常會自動提供 `DATABASE_URL`，無需手動設置資料庫連接資訊
+- **確保後端服務已連接到資料庫服務**，這樣 Railway 才會自動共享環境變數
+- 如果環境變數未正確共享，請檢查服務之間的連接設置
 
 ### 步驟 6: 執行資料庫遷移
 
