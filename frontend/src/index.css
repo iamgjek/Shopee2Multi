@@ -168,3 +168,77 @@ body {
 .ant-pagination-item-active a {
   color: #0a0a0a !important;
 }
+
+/* Header RWD 響應式設計 */
+@media (max-width: 768px) {
+  /* 隱藏桌面導航 */
+  .desktop-nav {
+    display: none !important;
+  }
+  
+  /* 隱藏桌面用戶信息 */
+  .desktop-user {
+    display: none !important;
+  }
+  
+  /* 隱藏桌面登入按鈕 */
+  .desktop-auth {
+    display: none !important;
+  }
+  
+  /* 顯示移動端選單按鈕 */
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  
+  /* 顯示移動端用戶頭像 */
+  .mobile-user {
+    display: block !important;
+  }
+  
+  /* 顯示移動端註冊按鈕 */
+  .mobile-auth {
+    display: block !important;
+  }
+}
+
+@media (min-width: 769px) {
+  /* 顯示桌面導航 */
+  .desktop-nav {
+    display: flex !important;
+  }
+  
+  /* 顯示桌面用戶信息 */
+  .desktop-user {
+    display: block !important;
+  }
+  
+  /* 顯示桌面登入按鈕 */
+  .desktop-auth {
+    display: flex !important;
+  }
+  
+  /* 隱藏移動端選單按鈕 */
+  .mobile-menu-btn {
+    display: none !important;
+  }
+  
+  /* 隱藏移動端用戶頭像 */
+  .mobile-user {
+    display: none !important;
+  }
+  
+  /* 隱藏移動端註冊按鈕 */
+  .mobile-auth {
+    display: none !important;
+  }
+}
+
+/* 中等螢幕調整 */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .desktop-nav a,
+  .desktop-nav Link {
+    padding: 0 12px !important;
+    font-size: 14px !important;
+  }
+}
