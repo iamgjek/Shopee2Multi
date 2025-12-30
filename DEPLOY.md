@@ -16,7 +16,7 @@
 4. **部署前端到 Vercel**：
    - 登入 Vercel → Add New Project
    - Root Directory: `frontend`
-   - 環境變數：`VITE_API_URL=https://your-backend.railway.app`
+   - 環境變數：`VITE_API_URL=https://shopee2multi-backend.railway.app`
 5. **更新 CORS**：在 Railway 後端更新 `CORS_ORIGIN` 為 Vercel 前端 URL
 
 **完成！** 🎉
@@ -103,7 +103,7 @@ DB_USER=${PGUSER}
 DB_PASSWORD=${PGPASSWORD}
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+CORS_ORIGIN=https://shopee2multi.vercel.app
 ```
 
 **重要**: 
@@ -269,6 +269,17 @@ npm run migrate
 - 確認已安裝 Chromium
 - 檢查系統依賴是否完整
 - 考慮使用 headless 模式
+
+### Railway Docker 建置失敗（npm: command not found）
+如果遇到 `npm: command not found` 錯誤，這表示 Railway 偵測到 Dockerfile 但 Dockerfile 中缺少 Node.js。
+
+**解決方案**：
+1. 確保專案根目錄有正確的 `Dockerfile`（已包含 Node.js 和 Playwright 依賴）
+2. 或者刪除 `Dockerfile` 讓 Railway 使用 NIXPACKS 自動偵測
+3. 如果使用 Dockerfile，確保它包含：
+   - Node.js 基礎映像（例如 `FROM node:18-slim`）
+   - Playwright 所需的系統依賴
+   - 正確的建置和啟動命令
 
 ---
 
