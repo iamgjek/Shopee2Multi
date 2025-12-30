@@ -122,8 +122,23 @@ app.use('/api/subscription', subscriptionRoutes);
 // Error handling
 app.use(errorHandler);
 
+// CORS test endpoint for debugging
+app.get('/api/cors-test', (req, res) => {
+  const origin = req.headers.origin;
+  res.json({
+    origin,
+    allowed: origin ? isOriginAllowed(origin) : false,
+    allowedOrigins,
+    message: 'CORS test endpoint'
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 CORS Configuration:`);
+  console.log(`   - Allowed origins from env: ${allowedOrigins.join(', ') || 'none'}`);
+  console.log(`   - Auto-allowing: *.vercel.app, localhost`);
+  console.log(`   - Test endpoint: /api/cors-test`);
 });
