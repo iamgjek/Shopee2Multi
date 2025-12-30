@@ -10,6 +10,9 @@ console.log(`   PGHOST: ${process.env.PGHOST || 'Not set'}`);
 console.log(`   DB_HOST: ${process.env.DB_HOST || 'Not set'}`);
 console.log(`   PGDATABASE: ${process.env.PGDATABASE || 'Not set'}`);
 console.log(`   DB_NAME: ${process.env.DB_NAME || 'Not set'}`);
+console.log(`   PGPORT: ${process.env.PGPORT || 'Not set'}`);
+console.log(`   PGUSER: ${process.env.PGUSER || 'Not set'}`);
+console.log(`   PGPASSWORD: ${process.env.PGPASSWORD ? '✅ Set' : '❌ Not set'}`);
 
 // 支援 DATABASE_URL（Railway 等平台常用）或單獨的環境變數
 let dbConfig;
@@ -24,30 +27,55 @@ if (process.env.DATABASE_URL) {
     connectionTimeoutMillis: 10000,
   };
 } else {
-  // 使用單獨的環境變數（也支援 Railway 的 PGHOST 等）
-  const host = process.env.DB_HOST || process.env.PGHOST || 'localhost';
-  const port = parseInt(process.env.DB_PORT || process.env.PGPORT || '5432');
-  const database = process.env.DB_NAME || process.env.PGDATABASE || 'shopee2multi';
-  const user = process.env.DB_USER || process.env.PGUSER || 'user';
-  const password = process.env.DB_PASSWORD || process.env.PGPASSWORD || 'password';
+  // 使用單獨的環境變數（優先使用 Railway 的 PGHOST 等，然後是自定義的 DB_*）
+  const host = process.env.PGHOST || process.env.DB_HOST;
+  const port = parseInt(process.env.PGPORT || process.env.DB_PORT || '5432');
+  const database = process.env.PGDATABASE || process.env.DB_NAME;
+  const user = process.env.PGUSER || process.env.DB_USER;
+  const password = process.env.PGPASSWORD || process.env.DB_PASSWORD;
   
-  console.log('📝 Using individual environment variables for connection');
-  console.log(`   Host: ${host}`);
-  console.log(`   Port: ${port}`);
-  console.log(`   Database: ${database}`);
-  console.log(`   User: ${user}`);
-  console.log(`   Password: ${password ? '✅ Set' : '❌ Not set'}`);
-  
-  dbConfig = {
-    host,
-    port,
-    database,
-    user,
-    password,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  };
+  // 檢查是否所有必要的環境變數都已設置
+  if (!host || !database || !user || !password) {
+    console.error('❌ Missing required database environment variables!');
+    console.error('   Required: PGHOST (or DB_HOST), PGDATABASE (or DB_NAME), PGUSER (or DB_USER), PGPASSWORD (or DB_PASSWORD)');
+    console.error('   Or set DATABASE_URL instead');
+    console.error('💡 In Railway:');
+    console.error('   1. Ensure PostgreSQL database service is created');
+    console.error('   2. Connect database service to backend service (Settings → Connect)');
+    console.error('   3. Railway will automatically provide PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD');
+    console.error('   4. Or manually set DATABASE_URL in backend service Variables');
+    
+    // 使用默認值（僅用於開發環境，生產環境會失敗）
+    console.warn('⚠️  Using default values (will fail in production)');
+    dbConfig = {
+      host: host || 'localhost',
+      port,
+      database: database || 'shopee2multi',
+      user: user || 'user',
+      password: password || 'password',
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+  } else {
+    console.log('📝 Using individual environment variables for connection');
+    console.log(`   Host: ${host}`);
+    console.log(`   Port: ${port}`);
+    console.log(`   Database: ${database}`);
+    console.log(`   User: ${user}`);
+    console.log(`   Password: ${password ? '✅ Set' : '❌ Not set'}`);
+    
+    dbConfig = {
+      host,
+      port,
+      database,
+      user,
+      password,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+  }
 }
 
 export const pool = new Pool(dbConfig);
