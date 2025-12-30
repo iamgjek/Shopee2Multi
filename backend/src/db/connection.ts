@@ -20,11 +20,24 @@ let dbConfig;
 if (process.env.DATABASE_URL) {
   // 使用 DATABASE_URL 連接字串
   console.log('📝 Using DATABASE_URL for connection');
+  
+  // 解析 DATABASE_URL 以顯示連接資訊（不顯示密碼）
+  try {
+    const url = new URL(process.env.DATABASE_URL);
+    console.log(`   Host: ${url.hostname}`);
+    console.log(`   Port: ${url.port || '5432'}`);
+    console.log(`   Database: ${url.pathname.slice(1)}`);
+    console.log(`   User: ${url.username}`);
+  } catch (e) {
+    console.warn('⚠️  Could not parse DATABASE_URL format');
+  }
+  
   dbConfig = {
     connectionString: process.env.DATABASE_URL,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 30000, // 增加到 30 秒
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   };
 } else {
   // 使用單獨的環境變數（優先使用 Railway 的 PGHOST 等，然後是自定義的 DB_*）
@@ -73,7 +86,8 @@ if (process.env.DATABASE_URL) {
       password,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 30000, // 增加到 30 秒
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     };
   }
 }
@@ -93,9 +107,12 @@ pool.query('SELECT NOW()', (err, res) => {
       console.error('📋 Using DATABASE_URL connection string');
       console.error('💡 Troubleshooting:');
       console.error('   1. 檢查 DATABASE_URL 環境變數是否正確設置');
-      console.error('   2. 確認資料庫服務正在運行');
-      console.error('   3. 確認資料庫連接字串格式正確');
-      console.error('   4. 在 Railway 上，確保資料庫服務已連接到後端服務');
+      console.error('   2. 確認資料庫服務正在運行（Railway Dashboard → 資料庫服務 → 檢查狀態）');
+      console.error('   3. 確認資料庫連接字串格式正確（應為 postgresql://user:password@host:port/database）');
+      console.error('   4. 在 Railway 上，確保資料庫服務已連接到後端服務（Settings → Connect）');
+      console.error('   5. 檢查 Railway 資料庫服務的日誌，確認服務正常運行');
+      console.error('   6. 如果使用 Railway，確認資料庫服務和後端服務在同一個專案中');
+      console.error('   7. 嘗試重新連接資料庫服務到後端服務');
     } else {
       console.error('📋 Connection details:');
       console.error(`   Host: ${dbConfig.host}`);
