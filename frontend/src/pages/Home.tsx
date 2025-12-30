@@ -12,8 +12,6 @@ import {
   GlobalOutlined,
   FileTextOutlined,
   ScissorOutlined,
-  CloudOutlined,
-  ApiOutlined,
   ArrowRightOutlined
 } from '@ant-design/icons'
 
