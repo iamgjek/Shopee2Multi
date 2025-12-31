@@ -48,7 +48,10 @@ export default function Dashboard() {
   }
 
   const handleDownload = (taskId: string) => {
-    window.open(`/api/conversion/download/${taskId}`, '_blank')
+    // 使用 api 實例的 baseURL 來構建完整的下載 URL
+    const baseURL = api.defaults.baseURL || '/api'
+    const downloadUrl = `${baseURL}/conversion/download/${taskId}`
+    window.open(downloadUrl, '_blank')
   }
 
   const getPlanName = () => {

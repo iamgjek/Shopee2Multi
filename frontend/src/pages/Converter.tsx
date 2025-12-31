@@ -7,7 +7,8 @@ import {
   Typography, 
   Space, 
   Alert, 
-  Spin
+  Spin,
+  message
 } from 'antd'
 import { DownloadOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import api from '../api/client'
@@ -162,9 +163,29 @@ export default function Converter() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (result?.downloadUrl) {
-      window.open(`/api${result.downloadUrl}`, '_blank')
+      try {
+        // 使用 api 實例下載，這樣會自動包含認證 token
+        const response = await api.get(result.downloadUrl, {
+          responseType: 'blob'
+        })
+        
+        // 創建 blob URL 並下載
+        const blob = new Blob([response.data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `shopee2multi-${platform}-${result.taskId}.xlsx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error: any) {
+        message.error(error.response?.data?.error?.message || '下載失敗')
+      }
     }
   }
 

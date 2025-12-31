@@ -22,6 +22,10 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // For blob requests, don't set Content-Type (let browser set it)
+  if (config.responseType === 'blob') {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 

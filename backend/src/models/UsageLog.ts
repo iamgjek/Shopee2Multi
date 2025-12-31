@@ -20,11 +20,17 @@ export class UsageLogModel {
     latencyMs?: number,
     errorCode?: string
   ): Promise<UsageLog> {
+    // 截斷錯誤訊息以避免超過資料庫欄位長度限制 (VARCHAR(100))
+    // 保留前 97 個字符，加上 "..." 後綴
+    const truncatedErrorCode = errorCode 
+      ? (errorCode.length > 100 ? errorCode.substring(0, 97) + '...' : errorCode)
+      : undefined;
+    
     const result = await pool.query(
       `INSERT INTO usage_logs (user_id, item_count, platform_target, status, latency_ms, error_code) 
        VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [userId, itemCount, platformTarget, status, latencyMs, errorCode]
+      [userId, itemCount, platformTarget, status, latencyMs, truncatedErrorCode]
     );
     return result.rows[0];
   }

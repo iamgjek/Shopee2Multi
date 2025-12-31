@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS usage_logs (
   platform_target VARCHAR(50) NOT NULL,
   status VARCHAR(50) NOT NULL CHECK (status IN ('success', 'failed', 'processing')),
   latency_ms INTEGER,
-  error_code VARCHAR(100),
+  error_code TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

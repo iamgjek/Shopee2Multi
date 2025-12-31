@@ -15,6 +15,7 @@ export interface ConvertedProduct {
 
 export class FormatConverter {
   static convertToMomo(product: ShopeeProduct): ConvertedProduct {
+    console.log(`      [FormatConverter] 轉換為 Momo 格式...`);
     // Momo requires HTML description
     const htmlDescription = this.createMomoDescription(product);
 
@@ -24,7 +25,7 @@ export class FormatConverter {
       momoSpecs['規格'] = product.variants.map(v => v.name).join(', ');
     }
 
-    return {
+    const converted = {
       title: product.title,
       description: htmlDescription,
       price: product.price,
@@ -33,13 +34,16 @@ export class FormatConverter {
       category: product.category || '',
       brand: product.brand || ''
     };
+    console.log(`      [FormatConverter] ✅ Momo 格式轉換完成`);
+    return converted;
   }
 
   static convertToPChome(product: ShopeeProduct): ConvertedProduct {
+    console.log(`      [FormatConverter] 轉換為 PChome 格式...`);
     // PChome requires two-layer specifications
     const pchomeSpecs = this.convertToTwoLayerSpecs(product);
 
-    return {
+    const converted = {
       title: product.title,
       description: product.description,
       price: product.price,
@@ -48,31 +52,40 @@ export class FormatConverter {
       category: product.category || '',
       brand: product.brand || ''
     };
+    console.log(`      [FormatConverter] ✅ PChome 格式轉換完成`);
+    return converted;
   }
 
   static convertToCoupang(product: ShopeeProduct): ConvertedProduct {
+    console.log(`      [FormatConverter] 轉換為 Coupang 格式...`);
     // Coupang format (future implementation)
-    return {
+    const converted = {
       title: product.title,
       description: product.description,
       price: product.price,
       specifications: {},
       images: product.images
     };
+    console.log(`      [FormatConverter] ✅ Coupang 格式轉換完成`);
+    return converted;
   }
 
   static convertToYahoo(product: ShopeeProduct): ConvertedProduct {
+    console.log(`      [FormatConverter] 轉換為 Yahoo 格式...`);
     // Yahoo format (future implementation)
-    return {
+    const converted = {
       title: product.title,
       description: product.description,
       price: product.price,
       specifications: {},
       images: product.images
     };
+    console.log(`      [FormatConverter] ✅ Yahoo 格式轉換完成`);
+    return converted;
   }
 
   static convertToEasystore(product: ShopeeProduct): ConvertedProduct {
+    console.log(`      [FormatConverter] 轉換為 EasyStore 格式...`);
     // EasyStore format - similar to Shopify, supports HTML description and variants
     const htmlDescription = this.createEasystoreDescription(product);
     
@@ -104,7 +117,7 @@ export class FormatConverter {
       }
     }
 
-    return {
+    const converted = {
       title: product.title,
       description: htmlDescription,
       price: product.price,
@@ -118,6 +131,8 @@ export class FormatConverter {
       tags: product.tags || [],
       material: material
     };
+    console.log(`      [FormatConverter] ✅ EasyStore 格式轉換完成`);
+    return converted;
   }
 
   private static createEasystoreDescription(product: ShopeeProduct): string {
@@ -125,46 +140,94 @@ export class FormatConverter {
     
     // Main description
     if (product.description) {
-      // Preserve line breaks and format
+      // Preserve line breaks and format, escape HTML
+      const escapeHtml = (text: string) => {
+        const map: Record<string, string> = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, (m) => map[m]);
+      };
+      
       const formattedDesc = product.description
-        .replace(/\n/g, '<br>')
-        .replace(/\r/g, '');
-      html += `<div class="product-description">${formattedDesc}</div>`;
+        .split('\n')
+        .map(line => escapeHtml(line.trim()))
+        .filter(line => line.length > 0)
+        .join('<br>');
+      html += `<div class="product-description"><p>${formattedDesc}</p></div>`;
     }
 
-    // Product specifications
+    // Product specifications table
     if (Object.keys(product.specifications).length > 0) {
-      html += '<div class="product-specifications"><h3>商品規格</h3><table style="width: 100%; border-collapse: collapse;">';
+      html += '<div class="product-specifications"><h3>商品規格</h3><table style="width: 100%; border-collapse: collapse; margin: 20px 0;">';
       for (const [key, value] of Object.entries(product.specifications)) {
-        html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${key}</td>`;
-        html += `<td style="padding: 8px; border: 1px solid #ddd;">${value}</td></tr>`;
+        const escapedKey = key.replace(/[&<>"']/g, (m) => {
+          const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+          return map[m];
+        });
+        const escapedValue = String(value).replace(/[&<>"']/g, (m) => {
+          const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+          return map[m];
+        });
+        html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #f5f5f5;">${escapedKey}</td>`;
+        html += `<td style="padding: 8px; border: 1px solid #ddd;">${escapedValue}</td></tr>`;
       }
       html += '</table></div>';
     }
 
-    // Variants
+    // Variants/Options
     if (product.variants.length > 0) {
-      html += '<div class="product-variants"><h3>商品選項</h3><ul>';
+      html += '<div class="product-variants"><h3>商品選項</h3><ul style="list-style: none; padding: 0;">';
       product.variants.forEach(variant => {
-        html += `<li>${variant.name}`;
+        const variantName = variant.name.replace(/[&<>"']/g, (m) => {
+          const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+          return map[m];
+        });
+        html += '<li style="padding: 8px 0; border-bottom: 1px solid #eee;">';
+        html += `<strong>${variantName}</strong>`;
         if (variant.price && variant.price !== product.price) {
-          html += ` - NT$ ${variant.price}`;
+          html += ` - <span style="color: #e74c3c; font-weight: bold;">NT$ ${variant.price}</span>`;
         }
-        if (variant.stock !== undefined) {
-          html += ` (庫存: ${variant.stock})`;
+        if (variant.stock !== undefined && variant.stock > 0) {
+          html += ` <span style="color: #27ae60;">(庫存: ${variant.stock})</span>`;
         }
         html += '</li>';
       });
       html += '</ul></div>';
     }
 
+    // Product details
+    html += '<div class="product-details" style="margin: 20px 0;">';
+    if (product.brand) {
+      html += `<p><strong>品牌:</strong> ${product.brand.replace(/[&<>"']/g, (m) => {
+        const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return map[m];
+      })}</p>`;
+    }
+    if (product.material) {
+      html += `<p><strong>材質:</strong> ${product.material.replace(/[&<>"']/g, (m) => {
+        const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return map[m];
+      })}</p>`;
+    }
+    if (product.weight && product.weight > 0) {
+      html += `<p><strong>重量:</strong> ${product.weight} kg</p>`;
+    }
+    html += '</div>';
+
     // Images gallery
     if (product.images && product.images.length > 0) {
-      html += '<div class="product-images"><h3>商品圖片</h3>';
+      html += '<div class="product-images"><h3>商品圖片</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0;">';
       product.images.forEach((img, index) => {
-        html += `<img src="${img}" alt="${product.title} - 圖片 ${index + 1}" style="max-width: 100%; margin: 10px 0;" />`;
+        html += `<img src="${img.replace(/&/g, '&amp;')}" alt="${(product.title || '商品').replace(/[&<>"']/g, (m) => {
+          const map: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+          return map[m];
+        })} - 圖片 ${index + 1}" style="max-width: 300px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />`;
       });
-      html += '</div>';
+      html += '</div></div>';
     }
 
     html += '</div>';
