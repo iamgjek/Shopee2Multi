@@ -88,6 +88,7 @@ export default function Dashboard() {
         const configs: Record<string, { color: string; label: string }> = {
           momo: { color: primaryColor, label: 'momo' },
           pchome: { color: '#52c41a', label: 'PChome' },
+          easystore: { color: '#1890ff', label: 'EasyStore' },
           coupang: { color: '#fa8c16', label: 'Coupang' },
           yahoo: { color: '#722ed1', label: 'Yahoo' }
         }

@@ -8,9 +8,19 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255),
   plan VARCHAR(50) DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'biz')),
   status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'deleted')),
+  role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Add role column if it doesn't exist (for existing databases)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                 WHERE table_name='users' AND column_name='role') THEN
+    ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin'));
+  END IF;
+END $$;
 
 -- Usage logs table
 CREATE TABLE IF NOT EXISTS usage_logs (

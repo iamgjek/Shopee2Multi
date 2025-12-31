@@ -7,6 +7,7 @@ import Converter from './pages/Converter'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Admin from './pages/Admin'
 import { useAuthStore } from './store/authStore'
 
 function App() {
@@ -35,6 +36,10 @@ function App() {
             <Route 
               path="/dashboard" 
               element={token ? <Dashboard /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/admin" 
+              element={token ? <Admin /> : <Navigate to="/login" />} 
             />
           </Routes>
         </Layout.Content>

@@ -420,6 +420,7 @@ export default function Home() {
               <Paragraph style={{ fontSize: '17px', color: darkTextSecondary, lineHeight: '1.6', marginBottom: '8px' }}>
                 momo 購物網<br />
                 PChome 24h 購物<br />
+                EasyStore<br />
                 Coupang 酷澎
               </Paragraph>
               <Text style={{ fontSize: '15px', color: darkTextSecondary, fontStyle: 'italic' }}>
@@ -457,7 +458,7 @@ export default function Home() {
               period: '月',
               features: [
                 '無限轉檔次數',
-                '支援 momo / PChome 格式',
+                '支援 momo / PChome / EasyStore 格式',
                 '圖片自動裁切',
                 '優先客服支援'
               ],

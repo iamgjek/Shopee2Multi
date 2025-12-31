@@ -8,6 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "migrate": "tsx src/db/migrate.ts",
+    "add-role": "tsx src/db/add-role.ts",
+    "seed": "tsx src/db/seed.ts",
     "postinstall": "npx playwright install chromium --with-deps || true",
     "test": "jest"
   },

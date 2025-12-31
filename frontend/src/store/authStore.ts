@@ -6,6 +6,7 @@ interface User {
   email: string
   name?: string
   plan: 'free' | 'pro' | 'biz'
+  role?: 'user' | 'admin'
 }
 
 interface AuthState {

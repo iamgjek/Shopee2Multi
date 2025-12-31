@@ -54,6 +54,11 @@ export default function Header() {
       ),
       disabled: true
     },
+    ...(user?.role === 'admin' ? [{
+      key: 'admin',
+      label: '管理後台',
+      onClick: () => navigate('/admin'),
+    }] : []),
     {
       key: 'dashboard',
       label: '儀表板',
@@ -151,15 +156,15 @@ export default function Header() {
           >
             價格方案
           </a>
-          <Link 
-            to={token ? "/converter" : "/login"} 
-            style={navLinkStyle(location.pathname === '/converter' || location.pathname === '/login')}
-            onMouseOver={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerText }}
-            onMouseOut={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerTextSecondary }}
-          >
-            轉檔工具
-          </Link>
-        </nav>
+        <Link 
+          to={token ? "/converter" : "/login"} 
+          style={navLinkStyle(location.pathname === '/converter' || location.pathname === '/login')}
+          onMouseOver={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerText }}
+          onMouseOut={(e) => { if (location.pathname !== '/converter' && location.pathname !== '/login') e.currentTarget.style.color = headerTextSecondary }}
+        >
+          轉檔工具
+        </Link>
+      </nav>
 
         {/* Right Section */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '20px' }}>
@@ -352,6 +357,15 @@ export default function Header() {
           </Link>
           {token && (
             <>
+              {user?.role === 'admin' && (
+                <Link 
+                  to="/admin" 
+                  onClick={closeDrawer}
+                  style={mobileNavLinkStyle(location.pathname === '/admin')}
+                >
+                  管理後台
+                </Link>
+              )}
               <Link 
                 to="/dashboard" 
                 onClick={closeDrawer}

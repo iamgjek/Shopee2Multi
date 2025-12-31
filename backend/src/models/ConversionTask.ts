@@ -60,4 +60,12 @@ export class ConversionTaskModel {
       [status, resultPath, errorMessage, id]
     );
   }
+
+  static async countByUserId(userId: string): Promise<number> {
+    const result = await pool.query(
+      'SELECT COUNT(*) as count FROM conversion_tasks WHERE user_id = $1',
+      [userId]
+    );
+    return parseInt(result.rows[0].count) || 0;
+  }
 }

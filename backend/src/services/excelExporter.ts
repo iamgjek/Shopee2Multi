@@ -67,6 +67,26 @@ export class ExcelExporter {
           '分類',
           '品牌'
         ];
+      case 'easystore':
+        return [
+          '商品名稱',
+          '商品描述',
+          '售價',
+          '原價',
+          'SKU',
+          '規格變體',
+          '庫存',
+          '圖片1',
+          '圖片2',
+          '圖片3',
+          '圖片4',
+          '圖片5',
+          '分類',
+          '品牌',
+          '材質',
+          '標籤',
+          '重量(kg)'
+        ];
       default:
         return [
           '商品名稱',
@@ -129,11 +149,57 @@ export class ExcelExporter {
         case '圖片3':
           row.push(product.images?.[2] || '');
           break;
+        case '圖片4':
+          row.push(product.images?.[3] || '');
+          break;
+        case '圖片5':
+          row.push(product.images?.[4] || '');
+          break;
+        case '原價':
+          row.push(product.originalPrice || product.price || 0);
+          break;
         case '分類':
           row.push(product.category || '');
           break;
         case '品牌':
           row.push(product.brand || '');
+          break;
+        case '材質':
+          row.push(product.material || '');
+          break;
+        case 'SKU':
+          row.push(product.sku || '');
+          break;
+        case '規格變體':
+          if (platform === 'easystore' && product.specifications) {
+            const specs = product.specifications as Record<string, any>;
+            if (specs.variants && Array.isArray(specs.variants)) {
+              row.push(specs.variants.map((v: any) => v.name).join('; ') || '');
+            } else {
+              row.push(JSON.stringify(specs) || '');
+            }
+          } else {
+            row.push('');
+          }
+          break;
+        case '庫存':
+          if (platform === 'easystore' && product.specifications) {
+            const specs = product.specifications as Record<string, any>;
+            if (specs.variants && Array.isArray(specs.variants)) {
+              const totalInventory = specs.variants.reduce((sum: number, v: any) => sum + (v.inventory || 0), 0);
+              row.push(totalInventory);
+            } else {
+              row.push(0);
+            }
+          } else {
+            row.push(0);
+          }
+          break;
+        case '標籤':
+          row.push(Array.isArray(product.tags) ? product.tags.join(', ') : '');
+          break;
+        case '重量(kg)':
+          row.push(product.weight || 0);
           break;
         default:
           row.push('');

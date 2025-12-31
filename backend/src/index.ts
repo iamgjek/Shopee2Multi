@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import conversionRoutes from './routes/conversion';
 import userRoutes from './routes/user';
 import subscriptionRoutes from './routes/subscription';
+import adminRoutes from './routes/admin';
 import { join } from 'path';
 
 dotenv.config();
@@ -118,6 +119,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/conversion', conversionRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handling
 app.use(errorHandler);

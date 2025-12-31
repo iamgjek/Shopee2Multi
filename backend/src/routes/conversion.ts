@@ -15,7 +15,7 @@ const router = express.Router();
 
 const convertSchema = z.object({
   url: z.string().url(),
-  platform: z.enum(['momo', 'pchome', 'coupang', 'yahoo'])
+  platform: z.enum(['momo', 'pchome', 'coupang', 'yahoo', 'easystore'])
 });
 
 // Convert Shopee product to target platform
@@ -51,6 +51,12 @@ router.post('/convert', authenticate, async (req: AuthRequest, res, next) => {
         throw new AppError('This platform requires Biz plan', 403);
       }
     }
+    // EasyStore is available for Pro and Biz plans
+    if (platform === 'easystore') {
+      if (user.plan === 'free') {
+        throw new AppError('EasyStore requires Pro plan or higher', 403);
+      }
+    }
 
     // Create conversion task
     const task = await ConversionTaskModel.create(userId, url, platform);
@@ -78,6 +84,9 @@ router.post('/convert', authenticate, async (req: AuthRequest, res, next) => {
         break;
       case 'yahoo':
         convertedProduct = FormatConverter.convertToYahoo(shopeeProduct);
+        break;
+      case 'easystore':
+        convertedProduct = FormatConverter.convertToEasystore(shopeeProduct);
         break;
       default:
         throw new AppError('Unsupported platform', 400);

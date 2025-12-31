@@ -34,7 +34,7 @@ router.post('/register', async (req, res, next) => {
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
     const token = jwt.sign(
-      { id: user.id, email: user.email, plan: user.plan },
+      { id: user.id, email: user.email, plan: user.plan, role: user.role || 'user' },
       jwtSecret,
       { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn'] }
     );
@@ -47,7 +47,8 @@ router.post('/register', async (req, res, next) => {
           id: user.id,
           email: user.email,
           name: user.name,
-          plan: user.plan
+          plan: user.plan,
+          role: user.role || 'user'
         }
       }
     });
@@ -76,7 +77,7 @@ router.post('/login', async (req, res, next) => {
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET || 'secret';
     const token = jwt.sign(
-      { id: user.id, email: user.email, plan: user.plan },
+      { id: user.id, email: user.email, plan: user.plan, role: user.role || 'user' },
       jwtSecret,
       { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn'] }
     );
@@ -89,7 +90,8 @@ router.post('/login', async (req, res, next) => {
           id: user.id,
           email: user.email,
           name: user.name,
-          plan: user.plan
+          plan: user.plan,
+          role: user.role || 'user'
         }
       }
     });

@@ -7,6 +7,7 @@ export interface AuthRequest extends Request {
     id: string;
     email: string;
     plan: string;
+    role?: string;
   };
 }
 
@@ -25,7 +26,7 @@ export const authenticate = (
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || 'secret'
-    ) as { id: string; email: string; plan: string };
+    ) as { id: string; email: string; plan: string; role?: string };
 
     req.user = decoded;
     next();
@@ -36,4 +37,23 @@ export const authenticate = (
       next(error);
     }
   }
+};
+
+// Admin authentication middleware
+export const requireAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  authenticate(req, res, () => {
+    if (!req.user) {
+      return next(new AppError('Authentication required', 401));
+    }
+    
+    if (req.user.role !== 'admin') {
+      return next(new AppError('Admin access required', 403));
+    }
+    
+    next();
+  });
 };

@@ -11,13 +11,15 @@ import {
 } from 'antd'
 import { DownloadOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import api from '../api/client'
+import { useAuthStore } from '../store/authStore'
 
 const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
 
-type Platform = 'momo' | 'pchome' | 'coupang' | 'yahoo'
+type Platform = 'momo' | 'pchome' | 'coupang' | 'yahoo' | 'easystore'
 
 export default function Converter() {
+  const { user } = useAuthStore()
   const [url, setUrl] = useState('')
   const [platform, setPlatform] = useState<Platform>('momo')
   const [loading, setLoading] = useState(false)
@@ -154,8 +156,9 @@ export default function Converter() {
                 options={[
                   { label: 'momo 購物網', value: 'momo' },
                   { label: 'PChome 24h 購物', value: 'pchome' },
-                  { label: 'Coupang 酷澎（需商業版）', value: 'coupang', disabled: true },
-                  { label: 'Yahoo 購物中心（需商業版）', value: 'yahoo', disabled: true }
+                  { label: 'EasyStore（需專業版）', value: 'easystore', disabled: user?.plan === 'free' },
+                  { label: 'Coupang 酷澎（需商業版）', value: 'coupang', disabled: user?.plan !== 'biz' },
+                  { label: 'Yahoo 購物中心（需商業版）', value: 'yahoo', disabled: user?.plan !== 'biz' }
                 ]}
               />
             </div>
