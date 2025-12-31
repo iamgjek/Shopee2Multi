@@ -26,19 +26,23 @@ const allowedOrigins = process.env.CORS_ORIGIN
 const isOriginAllowed = (origin: string): boolean => {
   // Check explicit allowed origins
   if (allowedOrigins.includes(origin)) {
+    console.log(`✅ Origin ${origin} matched explicit allowed origin`);
     return true;
   }
   
   // Allow Vercel preview deployments (*.vercel.app)
   if (origin.endsWith('.vercel.app')) {
+    console.log(`✅ Origin ${origin} matched *.vercel.app pattern`);
     return true;
   }
   
   // Allow localhost for development
   if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    console.log(`✅ Origin ${origin} matched localhost pattern`);
     return true;
   }
   
+  console.log(`❌ Origin ${origin} not allowed. Checked against: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
   return false;
 };
 
