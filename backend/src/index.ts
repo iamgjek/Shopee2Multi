@@ -48,30 +48,56 @@ const isOriginAllowed = (origin: string): boolean => {
 
 // Manual CORS middleware - runs first to ensure headers are set
 // This is a backup in case the cors library doesn't work correctly with Railway
+// IMPORTANT: This must handle OPTIONS requests even if the server is having issues
 app.use((req, res, next) => {
-  const origin = req.headers.origin as string | undefined;
-  
-  if (origin && isOriginAllowed(origin)) {
-    // Explicitly set CORS headers to prevent Railway from overriding
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Max-Age', '86400');
+  try {
+    const origin = req.headers.origin as string | undefined;
     
-    // Handle preflight requests immediately
+    // Always handle OPTIONS preflight requests, even if origin check fails
+    // This prevents 502 errors when the server is starting up or having issues
     if (req.method === 'OPTIONS') {
-      console.log(`✅ CORS preflight allowed for origin: ${origin}`);
-      return res.status(204).end();
+      if (origin && isOriginAllowed(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Max-Age', '86400');
+        console.log(`✅ CORS preflight allowed for origin: ${origin}`);
+        return res.status(204).end();
+      } else if (origin) {
+        // Even if origin is not allowed, respond to OPTIONS to prevent 502
+        console.warn(`⚠️  CORS preflight blocked for origin: ${origin}`);
+        return res.status(403).json({ error: 'CORS policy: Origin not allowed' });
+      } else {
+        // No origin header, allow the request (for same-origin or non-browser requests)
+        return res.status(204).end();
+      }
     }
     
-    console.log(`✅ CORS headers set for origin: ${origin}`);
-  } else if (origin) {
-    console.warn(`⚠️  CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
+    if (origin && isOriginAllowed(origin)) {
+      // Explicitly set CORS headers to prevent Railway from overriding
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      
+      console.log(`✅ CORS headers set for origin: ${origin}`);
+    } else if (origin) {
+      console.warn(`⚠️  CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
+    }
+    
+    next();
+  } catch (error) {
+    // If CORS middleware fails, still try to respond to OPTIONS requests
+    if (req.method === 'OPTIONS') {
+      console.error('❌ Error in CORS middleware, but responding to OPTIONS:', error);
+      return res.status(204).end();
+    }
+    next(error);
   }
-  
-  next();
 });
 
 // CORS middleware using cors library (as additional layer)
@@ -113,9 +139,23 @@ app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 // Rate limiting
 app.use('/api/', rateLimiter);
 
-// Health check
+// Health check - should be accessible without authentication
+// Place before rate limiting to ensure it's always accessible
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  try {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Health check failed',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Routes
@@ -147,6 +187,8 @@ const server = app.listen(PORT, () => {
   console.log(`   - Allowed origins from env: ${allowedOrigins.join(', ') || 'none'}`);
   console.log(`   - Auto-allowing: *.vercel.app, localhost`);
   console.log(`   - Test endpoint: /api/cors-test`);
+  console.log(`   - Health check: /health`);
+  console.log(`✅ Server is ready to accept connections`);
 });
 
 // Handle server errors
