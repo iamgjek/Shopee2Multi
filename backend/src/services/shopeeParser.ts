@@ -78,7 +78,9 @@ export class ShopeeParser {
         const pageData = await page.evaluate(() => {
           // Try to find JSON data in script tags
           // Note: This code runs in browser context, so document is available
-          const scripts = Array.from((document as any).querySelectorAll('script'));
+          // @ts-expect-error - document is available in browser context (Playwright page.evaluate)
+          const scripts = Array.from(document.querySelectorAll('script'));
+          // @ts-expect-error - HTMLScriptElement is available in browser context
           for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
@@ -218,7 +220,9 @@ export class ShopeeParser {
       try {
         const descData = await page.evaluate(() => {
           // Note: This code runs in browser context, so document is available
-          const scripts = Array.from((document as any).querySelectorAll('script'));
+          // @ts-expect-error - document is available in browser context (Playwright page.evaluate)
+          const scripts = Array.from(document.querySelectorAll('script'));
+          // @ts-expect-error - HTMLScriptElement is available in browser context
           for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
@@ -327,7 +331,9 @@ export class ShopeeParser {
       try {
         const variantData = await page.evaluate(() => {
           // Note: This code runs in browser context, so document is available
-          const scripts = Array.from((document as any).querySelectorAll('script'));
+          // @ts-expect-error - document is available in browser context (Playwright page.evaluate)
+          const scripts = Array.from(document.querySelectorAll('script'));
+          // @ts-expect-error - HTMLScriptElement is available in browser context
           for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
