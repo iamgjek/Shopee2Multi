@@ -77,8 +77,9 @@ export class ShopeeParser {
         console.log(`   [ShopeeParser] 嘗試從 JSON 資料提取商品資訊...`);
         const pageData = await page.evaluate(() => {
           // Try to find JSON data in script tags
-          const scripts = Array.from(document.querySelectorAll('script'));
-          for (const script of scripts) {
+          // Note: This code runs in browser context, so document is available
+          const scripts = Array.from((document as any).querySelectorAll('script'));
+          for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
               const match = content.match(/window\.__UNIVERSAL_DATA_FORCE_REVALIDATE__\s*=\s*({.+?});/s);
@@ -216,8 +217,9 @@ export class ShopeeParser {
       // Try to get description from JSON data first
       try {
         const descData = await page.evaluate(() => {
-          const scripts = Array.from(document.querySelectorAll('script'));
-          for (const script of scripts) {
+          // Note: This code runs in browser context, so document is available
+          const scripts = Array.from((document as any).querySelectorAll('script'));
+          for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
               const match = content.match(/window\.__UNIVERSAL_DATA_FORCE_REVALIDATE__\s*=\s*({.+?});/s);
@@ -324,8 +326,9 @@ export class ShopeeParser {
       // Try to extract from Shopee's internal data structure first
       try {
         const variantData = await page.evaluate(() => {
-          const scripts = Array.from(document.querySelectorAll('script'));
-          for (const script of scripts) {
+          // Note: This code runs in browser context, so document is available
+          const scripts = Array.from((document as any).querySelectorAll('script'));
+          for (const script of scripts as HTMLScriptElement[]) {
             const content = script.textContent || '';
             if (content.includes('__UNIVERSAL_DATA_FORCE_REVALIDATE__')) {
               const match = content.match(/window\.__UNIVERSAL_DATA_FORCE_REVALIDATE__\s*=\s*({.+?});/s);

@@ -113,7 +113,7 @@ export class ExcelExporter {
     const row: any[] = [];
 
     headers.forEach((header) => {
-      // EasyStore specific fields
+      // EasyStore specific fields (Shopify format)
       if (platform === 'easystore') {
         switch (header.trim()) {
           case 'Handle':
@@ -133,8 +133,38 @@ export class ExcelExporter {
             // Use the HTML description
             row.push(product.description || '');
             break;
+          case '規格變體':
+          case '變體名稱':
+          case '規格':
+            if (product.specifications) {
+              const specs = product.specifications as Record<string, any>;
+              if (specs.variants && Array.isArray(specs.variants)) {
+                // Format: "變體1; 變體2; 變體3"
+                row.push(specs.variants.map((v: any) => v.name).join('; ') || '');
+              } else {
+                // Fallback: use specifications as JSON
+                row.push(JSON.stringify(specs) || '');
+              }
+            } else {
+              row.push('');
+            }
+            break;
+          case '庫存':
+            if (product.specifications) {
+              const specs = product.specifications as Record<string, any>;
+              if (specs.variants && Array.isArray(specs.variants)) {
+                const totalInventory = specs.variants.reduce((sum: number, v: any) => sum + (v.inventory || 0), 0);
+                row.push(totalInventory);
+              } else {
+                row.push(0);
+              }
+            } else {
+              row.push(0);
+            }
+            break;
           default:
-            row.push('');
+            // For other EasyStore headers, try to map from common fields
+            ExcelExporter.handleEasyStoreDefaultHeader(header.trim(), product, row);
         }
         return;
       }
@@ -205,31 +235,15 @@ export class ExcelExporter {
         case '規格變體':
         case '變體名稱':
         case '規格':
-          if (platform === 'easystore' && product.specifications) {
-            const specs = product.specifications as Record<string, any>;
-            if (specs.variants && Array.isArray(specs.variants)) {
-              // Format: "變體1; 變體2; 變體3"
-              row.push(specs.variants.map((v: any) => v.name).join('; ') || '');
-            } else {
-              // Fallback: use specifications as JSON
-              row.push(JSON.stringify(specs) || '');
-            }
-          } else {
-            row.push('');
-          }
+          row.push(
+            typeof product.specifications === 'object'
+              ? JSON.stringify(product.specifications)
+              : product.specifications || ''
+          );
           break;
         case '庫存':
-          if (platform === 'easystore' && product.specifications) {
-            const specs = product.specifications as Record<string, any>;
-            if (specs.variants && Array.isArray(specs.variants)) {
-              const totalInventory = specs.variants.reduce((sum: number, v: any) => sum + (v.inventory || 0), 0);
-              row.push(totalInventory);
-            } else {
-              row.push(0);
-            }
-          } else {
-            row.push(0);
-          }
+          // For non-easystore platforms, inventory is not tracked
+          row.push(0);
           break;
         case '標籤':
           row.push(Array.isArray(product.tags) ? product.tags.join(', ') : '');
@@ -313,5 +327,56 @@ export class ExcelExporter {
     }
     
     return metaDesc || (product.title || '商品描述');
+  }
+
+  // Handle EasyStore default headers (mapping from common product fields)
+  private static handleEasyStoreDefaultHeader(header: string, product: ConvertedProduct, row: any[]): void {
+    switch (header) {
+      case '商品名稱':
+      case 'Title':
+        row.push(product.title || '');
+        break;
+      case '商品描述':
+      case 'Body (HTML)':
+        row.push(product.description || '');
+        break;
+      case '售價':
+      case 'Variant Price':
+        row.push(product.price || 0);
+        break;
+      case '原價':
+      case 'Compare at Price':
+        row.push(product.originalPrice || product.price || 0);
+        break;
+      case 'SKU':
+        row.push(product.sku || '');
+        break;
+      case '分類':
+      case 'Type':
+        row.push(product.category || '');
+        break;
+      case '品牌':
+      case 'Vendor':
+        row.push(product.brand || '');
+        break;
+      case '材質':
+      case 'Material':
+        row.push(product.material || '');
+        break;
+      case '標籤':
+      case 'Tags':
+        row.push(Array.isArray(product.tags) ? product.tags.join(', ') : '');
+        break;
+      case '重量(kg)':
+      case 'Weight':
+        row.push(product.weight || 0);
+        break;
+      case '圖片1':
+      case 'Image Src':
+        row.push(product.images?.[0] || '');
+        break;
+      default:
+        row.push('');
+    }
   }
 }
