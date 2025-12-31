@@ -63,20 +63,67 @@ export async function autoMigrate(): Promise<void> {
     const schema = readFileSync(schemaPath, 'utf-8');
     
     // 分割 SQL 語句
-    const statements = schema
-      .split('\n')
-      .map(line => {
-        const commentIndex = line.indexOf('--');
-        if (commentIndex >= 0) {
-          return line.substring(0, commentIndex).trim();
+    // 需要特別處理 DO $$ ... END $$; 這種 PostgreSQL 匿名代碼塊
+    const statements: string[] = [];
+    let currentStatement = '';
+    let inDollarQuote = false;
+    let dollarTag = '';
+    
+    // 移除註釋並處理多行語句
+    const lines = schema.split('\n').map(line => {
+      const commentIndex = line.indexOf('--');
+      if (commentIndex >= 0) {
+        return line.substring(0, commentIndex).trim();
+      }
+      return line.trim();
+    }).filter(line => line.length > 0);
+    
+    const cleanedSchema = lines.join('\n');
+    
+    // 逐字符處理，正確識別 DO $$ ... END $$; 塊
+    for (let i = 0; i < cleanedSchema.length; i++) {
+      const char = cleanedSchema[i];
+      const nextChar = cleanedSchema[i + 1] || '';
+      
+      // 檢查是否進入或退出 dollar-quoted 字符串
+      if (char === '$' && !inDollarQuote) {
+        // 查找 $ 標籤（例如 $$ 或 $tag$）
+        let tagEnd = i + 1;
+        while (tagEnd < cleanedSchema.length && cleanedSchema[tagEnd] !== '$') {
+          tagEnd++;
         }
-        return line.trim();
-      })
-      .filter(line => line.length > 0)
-      .join('\n')
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+        if (tagEnd < cleanedSchema.length) {
+          dollarTag = cleanedSchema.substring(i, tagEnd + 1);
+          inDollarQuote = true;
+          currentStatement += dollarTag;
+          i = tagEnd;
+          continue;
+        }
+      } else if (inDollarQuote && cleanedSchema.substring(i, i + dollarTag.length) === dollarTag) {
+        // 找到結束標籤
+        currentStatement += dollarTag;
+        i += dollarTag.length - 1;
+        inDollarQuote = false;
+        dollarTag = '';
+        continue;
+      }
+      
+      currentStatement += char;
+      
+      // 如果不在 dollar-quoted 字符串中，檢查分號
+      if (!inDollarQuote && char === ';') {
+        const trimmed = currentStatement.trim();
+        if (trimmed.length > 0) {
+          statements.push(trimmed);
+        }
+        currentStatement = '';
+      }
+    }
+    
+    // 添加最後一個語句（如果有的話）
+    if (currentStatement.trim().length > 0) {
+      statements.push(currentStatement.trim());
+    }
     
     console.log(`📝 [自動遷移] 執行 ${statements.length} 個 SQL 語句...`);
     
