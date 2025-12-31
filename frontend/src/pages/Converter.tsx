@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Card, 
   Input, 
@@ -19,12 +19,116 @@ const { TextArea } = Input
 type Platform = 'momo' | 'pchome' | 'coupang' | 'yahoo' | 'easystore'
 
 export default function Converter() {
-  const { user } = useAuthStore()
+  const { user, token } = useAuthStore()
   const [url, setUrl] = useState('')
   const [platform, setPlatform] = useState<Platform>('momo')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // 檢查平台是否可用
+  const isPlatformAvailable = (platformValue: Platform): boolean => {
+    if (!token || !user) {
+      // 未登入用戶只能使用免費平台
+      return platformValue === 'momo' || platformValue === 'pchome'
+    }
+
+    switch (platformValue) {
+      case 'momo':
+      case 'pchome':
+        // 所有方案都可以使用
+        return true
+      case 'easystore':
+        // 需要 Pro 或 Biz
+        return user.plan === 'pro' || user.plan === 'biz'
+      case 'coupang':
+      case 'yahoo':
+        // 需要 Biz
+        return user.plan === 'biz'
+      default:
+        return false
+    }
+  }
+
+  // 獲取平台選項
+  const getPlatformOptions = () => {
+    const options = [
+      { 
+        label: 'momo 購物網', 
+        value: 'momo' as Platform,
+        disabled: false
+      },
+      { 
+        label: 'PChome 24h 購物', 
+        value: 'pchome' as Platform,
+        disabled: false
+      },
+      { 
+        label: 'EasyStore（需專業版）', 
+        value: 'easystore' as Platform,
+        disabled: !isPlatformAvailable('easystore')
+      },
+      { 
+        label: 'Coupang 酷澎（需商業版）', 
+        value: 'coupang' as Platform,
+        disabled: !isPlatformAvailable('coupang')
+      },
+      { 
+        label: 'Yahoo 購物中心（需商業版）', 
+        value: 'yahoo' as Platform,
+        disabled: !isPlatformAvailable('yahoo')
+      }
+    ]
+    return options
+  }
+
+  // 處理平台變更，如果選擇的平台不可用，自動切換到第一個可用平台
+  const handlePlatformChange = (value: Platform) => {
+    if (isPlatformAvailable(value)) {
+      setPlatform(value)
+    } else {
+      // 如果選擇的平台不可用，切換到第一個可用平台
+      const availablePlatform = getPlatformOptions().find(opt => !opt.disabled)
+      if (availablePlatform) {
+        setPlatform(availablePlatform.value)
+      }
+    }
+  }
+
+  // 當用戶登入狀態或方案改變時，檢查當前平台是否可用
+  useEffect(() => {
+    // 檢查當前平台是否可用
+    let currentPlatformAvailable = false
+    if (!token || !user) {
+      currentPlatformAvailable = platform === 'momo' || platform === 'pchome'
+    } else {
+      switch (platform) {
+        case 'momo':
+        case 'pchome':
+          currentPlatformAvailable = true
+          break
+        case 'easystore':
+          currentPlatformAvailable = user.plan === 'pro' || user.plan === 'biz'
+          break
+        case 'coupang':
+        case 'yahoo':
+          currentPlatformAvailable = user.plan === 'biz'
+          break
+        default:
+          currentPlatformAvailable = false
+      }
+    }
+
+    if (!currentPlatformAvailable) {
+      // 如果當前平台不可用，切換到第一個可用平台
+      const options = getPlatformOptions()
+      const availablePlatform = options.find(opt => !opt.disabled)
+      if (availablePlatform && availablePlatform.value !== platform) {
+        setPlatform(availablePlatform.value)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.plan])
 
   // Dark mode 主題色（黑/綠色）
   const primaryColor = '#00ff88' // 亮綠色
@@ -151,16 +255,44 @@ export default function Converter() {
                 size="large"
                 style={{ width: '100%' }}
                 value={platform}
-                onChange={setPlatform}
+                onChange={handlePlatformChange}
                 disabled={loading}
-                options={[
-                  { label: 'momo 購物網', value: 'momo' },
-                  { label: 'PChome 24h 購物', value: 'pchome' },
-                  { label: 'EasyStore（需專業版）', value: 'easystore', disabled: user?.plan === 'free' },
-                  { label: 'Coupang 酷澎（需商業版）', value: 'coupang', disabled: user?.plan !== 'biz' },
-                  { label: 'Yahoo 購物中心（需商業版）', value: 'yahoo', disabled: user?.plan !== 'biz' }
-                ]}
+                options={getPlatformOptions()}
               />
+              {/* 權限提示 */}
+              {!token && (
+                <Text style={{ 
+                  display: 'block',
+                  fontSize: '14px',
+                  color: darkTextSecondary,
+                  marginTop: '8px',
+                  fontStyle: 'italic'
+                }}>
+                  💡 登入後可解鎖更多平台選項
+                </Text>
+              )}
+              {token && user?.plan === 'free' && (
+                <Text style={{ 
+                  display: 'block',
+                  fontSize: '14px',
+                  color: darkTextSecondary,
+                  marginTop: '8px',
+                  fontStyle: 'italic'
+                }}>
+                  💡 升級至 Pro 版或 Biz 版可解鎖更多平台
+                </Text>
+              )}
+              {token && user?.plan === 'pro' && (
+                <Text style={{ 
+                  display: 'block',
+                  fontSize: '14px',
+                  color: darkTextSecondary,
+                  marginTop: '8px',
+                  fontStyle: 'italic'
+                }}>
+                  💡 升級至 Biz 版可解鎖 Coupang 和 Yahoo
+                </Text>
+              )}
             </div>
 
             {/* 錯誤訊息 */}
