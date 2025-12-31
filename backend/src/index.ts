@@ -14,7 +14,7 @@ import { join } from 'path';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // CORS configuration - support multiple origins and Vercel preview deployments
 // MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
@@ -180,8 +180,11 @@ app.get('/api/cors-test', (req, res) => {
 });
 
 // Start server with error handling
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+// IMPORTANT: Bind to 0.0.0.0 (all interfaces) not localhost for Railway/cloud deployments
+// Railway will automatically set PORT environment variable
+const HOST = process.env.HOST || '0.0.0.0';
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS Configuration:`);
   console.log(`   - Allowed origins from env: ${allowedOrigins.join(', ') || 'none'}`);
@@ -189,6 +192,7 @@ const server = app.listen(PORT, () => {
   console.log(`   - Test endpoint: /api/cors-test`);
   console.log(`   - Health check: /health`);
   console.log(`✅ Server is ready to accept connections`);
+  console.log(`📡 Listening on all network interfaces (0.0.0.0) for Railway compatibility`);
 });
 
 // Handle server errors
@@ -204,11 +208,32 @@ server.on('error', (err: NodeJS.ErrnoException) => {
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
-  // Don't exit immediately, allow graceful shutdown
+  console.error('Stack trace:', err.stack);
+  // In production, we might want to exit, but for now allow graceful shutdown
+  // process.exit(1);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  // Don't exit immediately, allow graceful shutdown
+  console.error('❌ Unhandled Rejection at:', promise);
+  console.error('Reason:', reason);
+  // In production, we might want to exit, but for now allow graceful shutdown
+  // process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('📴 SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('📴 SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
