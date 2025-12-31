@@ -13,13 +13,10 @@ import {
   Statistic,
   Modal,
   message,
-  Tabs,
-  Spin
+  Tabs
 } from 'antd'
 import { 
-  UserOutlined, 
   CrownOutlined, 
-  ThunderboltOutlined,
   SearchOutlined,
   EditOutlined,
   ReloadOutlined
@@ -29,7 +26,6 @@ import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
 
 const { Title, Text } = Typography
-const { Option } = Select
 
 interface User {
   id: string
