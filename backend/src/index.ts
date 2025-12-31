@@ -10,6 +10,7 @@ import userRoutes from './routes/user';
 import subscriptionRoutes from './routes/subscription';
 import adminRoutes from './routes/admin';
 import { join } from 'path';
+import { autoMigrate } from './db/autoMigrate';
 
 dotenv.config();
 
@@ -183,6 +184,14 @@ app.get('/api/cors-test', (req, res) => {
 // IMPORTANT: Bind to 0.0.0.0 (all interfaces) not localhost for Railway/cloud deployments
 // Railway will automatically set PORT environment variable
 const HOST = process.env.HOST || '0.0.0.0';
+
+// Auto-migrate database on startup (non-blocking)
+// This ensures tables are created automatically if they don't exist
+autoMigrate().catch(err => {
+  console.error('⚠️  Auto-migration failed, but server will continue:', err);
+  console.error('💡 You may need to run migration manually: npm run migrate');
+});
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on http://${HOST}:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
