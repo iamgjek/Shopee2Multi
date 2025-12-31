@@ -39,7 +39,13 @@ function App() {
             />
             <Route 
               path="/admin" 
-              element={token ? <Admin /> : <Navigate to="/login" />} 
+              element={
+                token ? (
+                  <Admin />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              } 
             />
           </Routes>
         </Layout.Content>

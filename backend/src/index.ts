@@ -11,6 +11,7 @@ import subscriptionRoutes from './routes/subscription';
 import adminRoutes from './routes/admin';
 import { join } from 'path';
 import { autoMigrate } from './db/autoMigrate';
+import { autoSeedAdmin } from './db/autoSeed';
 
 dotenv.config();
 
@@ -187,10 +188,16 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 // Auto-migrate database on startup (non-blocking)
 // This ensures tables are created automatically if they don't exist
-autoMigrate().catch(err => {
-  console.error('⚠️  Auto-migration failed, but server will continue:', err);
-  console.error('💡 You may need to run migration manually: npm run migrate');
-});
+autoMigrate()
+  .then(() => {
+    // After migration, seed admin user if enabled
+    return autoSeedAdmin();
+  })
+  .catch(err => {
+    console.error('⚠️  Auto-migration/seed failed, but server will continue:', err);
+    console.error('💡 You may need to run migration manually: npm run migrate');
+    console.error('💡 You may need to run seed manually: npm run seed');
+  });
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on http://${HOST}:${PORT}`);

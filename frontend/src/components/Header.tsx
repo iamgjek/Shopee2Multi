@@ -164,6 +164,16 @@ export default function Header() {
         >
           轉檔工具
         </Link>
+        {token && user?.role === 'admin' && (
+          <Link 
+            to="/admin" 
+            style={navLinkStyle(location.pathname === '/admin')}
+            onMouseOver={(e) => { if (location.pathname !== '/admin') e.currentTarget.style.color = headerText }}
+            onMouseOut={(e) => { if (location.pathname !== '/admin') e.currentTarget.style.color = headerTextSecondary }}
+          >
+            管理後台
+          </Link>
+        )}
       </nav>
 
         {/* Right Section */}
