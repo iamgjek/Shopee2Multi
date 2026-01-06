@@ -20,8 +20,10 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // Trust proxy - Required when behind a reverse proxy (Railway, Nginx, etc.)
+// Set to 1 to trust only the first proxy (Railway's reverse proxy)
 // This allows express-rate-limit to correctly identify client IPs from X-Forwarded-For header
-app.set('trust proxy', true);
+// while maintaining security by not trusting all proxies
+app.set('trust proxy', 1);
 
 // CORS configuration - support multiple origins and Vercel preview deployments
 // MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
