@@ -105,7 +105,7 @@ NODE_ENV=production
 PORT=3001
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=https://shopee2multi.vercel.app
+CORS_ORIGIN=https://shopee2multi.vercel.app,https://shopee2multi.space
 ```
 
 **方法 2: 使用單獨的環境變數**
@@ -131,7 +131,7 @@ DB_USER=<從資料庫服務複製的 PGUSER 值>
 DB_PASSWORD=<從資料庫服務複製的 PGPASSWORD 值>
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=https://shopee2multi.vercel.app
+CORS_ORIGIN=https://shopee2multi.vercel.app,https://shopee2multi.space
 ```
 
 **重要**: 
@@ -189,7 +189,9 @@ CORS_ORIGIN=https://shopee2multi.vercel.app
 部署前端後，更新後端的 `CORS_ORIGIN` 環境變數：
 
 1. 在 Railway 後端服務的 Variables 中
-2. 更新 `CORS_ORIGIN` 為您的前端 URL（例如：`https://shopee2multi.vercel.app`）
+2. 更新 `CORS_ORIGIN` 為您的前端 URL（例如：`https://shopee2multi.vercel.app,https://shopee2multi.space`）
+   - 多個域名用逗號分隔
+   - 注意：代碼會自動允許 `shopee2multi.space` 域名，但建議在環境變數中明確指定
 3. Railway 會自動重新部署
 
 ---

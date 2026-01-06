@@ -7,6 +7,7 @@ import { ConversionTaskModel } from '../models/ConversionTask';
 import { UsageLogModel } from '../models/UsageLog';
 import { UserModel } from '../models/User';
 import { AppError } from '../middleware/errorHandler';
+import { setCorsHeaders } from '../utils/cors';
 import { z } from 'zod';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
@@ -203,7 +204,23 @@ router.get('/download/:taskId', authenticate, async (req: AuthRequest, res, next
       throw new AppError('File not ready', 404);
     }
 
-    res.download(task.result_path, `shopee2multi-${task.platform_target}-${task.id}.xlsx`);
+    // Set CORS headers before download
+    setCorsHeaders(req, res);
+
+    // Use sendFile instead of download to have better control over headers
+    // Set Content-Disposition header for file download
+    const filename = `shopee2multi-${task.platform_target}-${task.id}.xlsx`;
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    
+    res.sendFile(join(process.cwd(), task.result_path), (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+        if (!res.headersSent) {
+          next(err);
+        }
+      }
+    });
   } catch (error) {
     next(error);
   }

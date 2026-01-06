@@ -100,6 +100,17 @@ SITE_URL=https://shopee2multi.space
 
 **常見 SMTP 服務商配置**：
 
+**SendGrid**（推薦用於生產環境，特別是 Railway 等雲平台）:
+```
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASSWORD=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SMTP_FROM=noreply@shopee2multi.space
+```
+
+**詳細配置步驟**：請參考 [SENDGRID_SETUP.md](./SENDGRID_SETUP.md) 文件
+
 **Gmail**:
 ```
 SMTP_HOST=smtp.gmail.com
@@ -108,15 +119,9 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 ```
 
-**詳細配置步驟**：請參考 [GMAIL_SETUP.md](./GMAIL_SETUP.md) 文件
+**注意**：Gmail SMTP 在某些雲平台（如 Railway）上可能無法連接（連接超時）。如果遇到此問題，建議使用 SendGrid。
 
-**SendGrid**:
-```
-SMTP_HOST=smtp.sendgrid.net
-SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASSWORD=your-sendgrid-api-key
-```
+**詳細配置步驟**：請參考 [GMAIL_SETUP.md](./GMAIL_SETUP.md) 文件
 
 **Mailgun**:
 ```

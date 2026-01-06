@@ -13,11 +13,18 @@ import contactRoutes from './routes/contact';
 import { join } from 'path';
 import { autoMigrate } from './db/autoMigrate';
 import { autoSeedAdmin } from './db/autoSeed';
+import { setCorsHeaders } from './utils/cors';
 
 dotenv.config();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
+
+// Trust proxy - Required when behind a reverse proxy (Railway, Nginx, etc.)
+// Set to 1 to trust only the first proxy (Railway's reverse proxy)
+// This allows express-rate-limit to correctly identify client IPs from X-Forwarded-For header
+// while maintaining security by not trusting all proxies
+app.set('trust proxy', 1);
 
 // CORS configuration - support multiple origins and Vercel preview deployments
 // MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
@@ -25,29 +32,25 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173'];
 
-// Helper function to check if origin is allowed
-const isOriginAllowed = (origin: string): boolean => {
-  // Check explicit allowed origins
-  if (allowedOrigins.includes(origin)) {
-    console.log(`✅ Origin ${origin} matched explicit allowed origin`);
-    return true;
-  }
+// Import CORS utilities
+import { isOriginAllowed } from './utils/cors';
+
+// Helper function to check if origin is allowed (with logging)
+const isOriginAllowedWithLogging = (origin: string): boolean => {
+  const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173'];
   
-  // Allow Vercel preview deployments (*.vercel.app)
-  if (origin.endsWith('.vercel.app')) {
-    console.log(`✅ Origin ${origin} matched *.vercel.app pattern`);
-    return true;
-  }
-  
-  // Allow shopee2multi.space domain
-  if (origin.includes('shopee2multi.space')) {
-    console.log(`✅ Origin ${origin} matched shopee2multi.space pattern`);
-    return true;
-  }
-  
-  // Allow localhost for development
-  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-    console.log(`✅ Origin ${origin} matched localhost pattern`);
+  if (isOriginAllowed(origin)) {
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✅ Origin ${origin} matched explicit allowed origin`);
+    } else if (origin.endsWith('.vercel.app')) {
+      console.log(`✅ Origin ${origin} matched *.vercel.app pattern`);
+    } else if (origin.includes('shopee2multi.space')) {
+      console.log(`✅ Origin ${origin} matched shopee2multi.space pattern`);
+    } else if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      console.log(`✅ Origin ${origin} matched localhost pattern`);
+    }
     return true;
   }
   
@@ -65,7 +68,7 @@ app.use((req, res, next) => {
     // Always handle OPTIONS preflight requests, even if origin check fails
     // This prevents 502 errors when the server is starting up or having issues
     if (req.method === 'OPTIONS') {
-      if (origin && isOriginAllowed(origin)) {
+      if (origin && isOriginAllowedWithLogging(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -84,7 +87,7 @@ app.use((req, res, next) => {
       }
     }
     
-    if (origin && isOriginAllowed(origin)) {
+    if (origin && isOriginAllowedWithLogging(origin)) {
       // Explicitly set CORS headers to prevent Railway from overriding
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -117,7 +120,7 @@ app.use(cors({
       return callback(null, true);
     }
     
-    if (isOriginAllowed(origin)) {
+    if (isOriginAllowedWithLogging(origin)) {
       // Explicitly return the origin value to ensure correct CORS header
       callback(null, origin);
     } else {
@@ -132,18 +135,72 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Middleware - Configure helmet to not interfere with CORS
+// Middleware - Configure helmet with comprehensive security headers
 // Placed AFTER CORS to ensure CORS headers are not overridden
+// Reference: https://web.dev/articles/hacked
 app.use(helmet({
+  // Prevent XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"], // 移除 http: 以強制使用 HTTPS
+      connectSrc: ["'self'", "https://www.google-analytics.com", "https://shopee2multi-backend.railway.app"],
+      fontSrc: ["'self'", "data:", "https:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'", "https:"],
+      frameSrc: ["'none'"],
+      upgradeInsecureRequests: [], // 自動將 HTTP 升級為 HTTPS
+    },
+  },
+  // Prevent clickjacking
+  // Using SAMEORIGIN instead of DENY for better compatibility
+  // This allows same-origin embedding while preventing cross-origin attacks
+  frameguard: {
+    action: 'sameorigin',
+  },
+  // Prevent MIME type sniffing
+  noSniff: true,
+  // Hide X-Powered-By header
+  hidePoweredBy: true,
+  // XSS Protection (legacy, but still useful)
+  xssFilter: true,
+  // Referrer Policy
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin',
+  },
+  // Cross-Origin policies
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  // HSTS (HTTP Strict Transport Security) - only in production
+  strictTransportSecurity: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
+
+// Manually set Permissions-Policy header (not supported in Helmet 7.x)
+// This restricts browser features and APIs to prevent unauthorized access
+// Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+app.use((req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+  );
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+// Serve uploaded files with CORS support
+app.use('/uploads', (req, res, next) => {
+  // Set CORS headers for static files
+  setCorsHeaders(req, res);
+  next();
+}, express.static(join(process.cwd(), 'uploads')));
 
 // Rate limiting
 app.use('/api/', rateLimiter);
