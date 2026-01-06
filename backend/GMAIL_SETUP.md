@@ -105,6 +105,40 @@ A: 這是 Google 的安全機制。如果您的應用程式密碼正確，可以
 4. 檢查後端日誌中的錯誤訊息
 5. 確認防火牆允許連接到 `smtp.gmail.com:587`
 
+### Q: 遇到「Connection timeout」錯誤怎麼辦？
+
+**錯誤訊息**：`Error: Connection timeout` 或 `ETIMEDOUT`
+
+**可能原因和解決方案**：
+
+1. **網絡連接問題**
+   - Railway 服務器可能無法訪問 Gmail SMTP 服務器
+   - 檢查 Railway 服務器的網絡設置
+   - 確認沒有防火牆阻止連接
+
+2. **SMTP 配置錯誤**
+   - 確認 `SMTP_HOST=smtp.gmail.com`
+   - 確認 `SMTP_PORT=587`（或 `465` 用於 SSL）
+   - 嘗試使用端口 `465` 和 `secure: true`
+
+3. **Gmail 訪問限制**
+   - 某些部署平台可能被 Gmail 阻止
+   - 考慮使用其他 SMTP 服務（SendGrid、Mailgun 等）
+
+4. **應用程式密碼問題**
+   - 確認應用程式密碼正確
+   - 嘗試重新生成應用程式密碼
+
+5. **替代方案**
+   - 使用 SendGrid（推薦用於生產環境）
+   - 使用 Mailgun
+   - 使用 AWS SES
+
+**系統已自動實現**：
+- ✅ 連接超時時間已增加到 30 秒
+- ✅ 自動重試機制（最多 3 次）
+- ✅ 詳細的錯誤診斷信息
+
 ### Q: 可以使用其他 Gmail 帳號發送郵件嗎？
 
 A: 可以，只需：
