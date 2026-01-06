@@ -19,6 +19,10 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
+// Trust proxy - Required when behind a reverse proxy (Railway, Nginx, etc.)
+// This allows express-rate-limit to correctly identify client IPs from X-Forwarded-For header
+app.set('trust proxy', true);
+
 // CORS configuration - support multiple origins and Vercel preview deployments
 // MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
 const allowedOrigins = process.env.CORS_ORIGIN 
