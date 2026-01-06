@@ -43,6 +43,18 @@ export default function Header() {
     }
   }
 
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      navigate('/')
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
+    }
+  }
+
   const userMenuItems = [
     {
       key: 'email',
@@ -120,15 +132,19 @@ export default function Header() {
         zIndex: 1000
       }}>
         {/* Logo */}
-        <Link to="/" style={{ 
-          fontSize: '20px', 
-          fontWeight: 700, 
-          color: headerText,
-          textDecoration: 'none',
-          letterSpacing: '-0.5px',
-          marginRight: '20px',
-          whiteSpace: 'nowrap'
-        }}>
+        <Link 
+          to="/" 
+          onClick={handleHomeClick}
+          style={{ 
+            fontSize: '20px', 
+            fontWeight: 700, 
+            color: headerText,
+            textDecoration: 'none',
+            letterSpacing: '-0.5px',
+            marginRight: '20px',
+            whiteSpace: 'nowrap'
+          }}
+        >
           Shopee2Multi
         </Link>
 
@@ -141,6 +157,7 @@ export default function Header() {
         }} className="desktop-nav">
           <Link 
             to="/" 
+            onClick={handleHomeClick}
             style={navLinkStyle(location.pathname === '/')}
             onMouseOver={(e) => { if (location.pathname !== '/') e.currentTarget.style.color = headerText }}
             onMouseOut={(e) => { if (location.pathname !== '/') e.currentTarget.style.color = headerTextSecondary }}
@@ -343,7 +360,10 @@ export default function Header() {
         }}>
           <Link 
             to="/" 
-            onClick={closeDrawer}
+            onClick={(e) => {
+              handleHomeClick(e)
+              closeDrawer()
+            }}
             style={mobileNavLinkStyle(location.pathname === '/')}
           >
             首頁
