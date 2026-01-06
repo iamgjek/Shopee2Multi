@@ -36,63 +36,56 @@ export default function Home() {
   const section5Ref = useRef<HTMLDivElement>(null)
   const section6Ref = useRef<HTMLDivElement>(null)
 
-  // 滾動視差效果
+  // 滾動視差效果 - 優化性能版本
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || window.pageYOffset
-      const windowHeight = window.innerHeight
-      
-      const sections = [
-        section1Ref,
-        section2Ref,
-        section3Ref,
-        section4Ref,
-        section5Ref,
-        section6Ref
-      ]
-      
-      sections.forEach((ref) => {
-        if (ref.current) {
-          const rect = ref.current.getBoundingClientRect()
-          const elementTop = rect.top + scrollY
-          const elementCenter = elementTop + rect.height / 2
-          const viewportCenter = scrollY + windowHeight / 2
-          const distanceFromCenter = viewportCenter - elementCenter
-          
-          // 視差偏移量（可調整速度，負值表示向上移動，正值表示向下移動）
-          // 當元素在視窗上方時向上移動，在視窗下方時向下移動
-          const parallaxSpeed = 0.3 // 視差速度係數（可調整）
-          const parallaxOffset = distanceFromCenter * parallaxSpeed
-          
-          // 只在元素接近視窗時應用視差
-          if (rect.top < windowHeight * 1.5 && rect.bottom > -windowHeight * 0.5) {
-            ref.current.style.transform = `translateY(${parallaxOffset}px)`
-          } else {
-            // 元素遠離視窗時重置位置
-            ref.current.style.transform = 'translateY(0px)'
-          }
-        }
-      })
-    }
+    const sections = [
+      section1Ref,
+      section2Ref,
+      section3Ref,
+      section4Ref,
+      section5Ref,
+      section6Ref
+    ]
 
-    // 使用 requestAnimationFrame 優化性能
+    // 使用 requestAnimationFrame 優化滾動性能
     let ticking = false
-    const optimizedScroll = () => {
+    const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          handleScroll()
+          const scrollY = window.scrollY || window.pageYOffset
+          const windowHeight = window.innerHeight
+          
+          sections.forEach((ref) => {
+            if (ref.current) {
+              const rect = ref.current.getBoundingClientRect()
+              // 只在元素接近視窗時應用視差（減少計算）
+              if (rect.top < windowHeight * 1.5 && rect.bottom > -windowHeight * 0.5) {
+                const elementTop = rect.top + scrollY
+                const elementCenter = elementTop + rect.height / 2
+                const viewportCenter = scrollY + windowHeight / 2
+                const distanceFromCenter = viewportCenter - elementCenter
+                const parallaxSpeed = 0.3
+                const parallaxOffset = distanceFromCenter * parallaxSpeed
+                ref.current.style.transform = `translateY(${parallaxOffset}px)`
+              } else {
+                // 元素遠離視窗時重置位置
+                ref.current.style.transform = 'translateY(0px)'
+              }
+            }
+          })
           ticking = false
         })
         ticking = true
       }
     }
 
-    window.addEventListener('scroll', optimizedScroll, { passive: true })
+    // 使用 passive 事件監聽器提升滾動性能
+    window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleScroll, { passive: true })
     handleScroll() // 初始調用以設置初始位置
 
     return () => {
-      window.removeEventListener('scroll', optimizedScroll)
+      window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
   }, [])
@@ -179,10 +172,11 @@ export default function Home() {
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          backgroundImage: 'url(https://images.unsplash.com/photo-1557804506-669a67965ba3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80)',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1557804506-669a67965ba3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=75)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          loading: 'lazy'
         }}
       >
         {/* 深色遮罩層 */}
