@@ -12,9 +12,6 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
-    headers: {
-      'Content-Type': 'application/javascript; charset=utf-8',
-    },
   },
   build: {
     // 啟用代碼分割

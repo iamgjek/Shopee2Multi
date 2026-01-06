@@ -38,103 +38,41 @@ class EmailService {
           user: smtpUser,
           pass: smtpPassword,
         },
-        // 連接超時設置（增加到 30 秒）
-        connectionTimeout: 30000, // 30 seconds
-        socketTimeout: 30000, // 30 seconds
-        greetingTimeout: 30000, // 30 seconds
         // 對於 Gmail，可能需要設置
         ...(smtpHost.includes('gmail') && {
           service: 'gmail',
         }),
-        // 調試模式（僅在開發環境）
-        debug: process.env.NODE_ENV === 'development',
-        logger: process.env.NODE_ENV === 'development',
       });
 
       console.log('✅ [郵件服務] SMTP 傳輸器已初始化');
-      console.log(`   主機: ${smtpHost}:${smtpPort}`);
-      console.log(`   用戶: ${smtpUser}`);
-      
-      // 驗證連接（異步，不阻塞啟動）
-      this.verifyConnection().catch((error) => {
-        console.warn('⚠️  [郵件服務] 連接驗證失敗（這可能不影響後續使用）:', error.message);
-      });
     } catch (error) {
       console.error('❌ [郵件服務] 初始化失敗:', error);
     }
   }
 
-  // 驗證 SMTP 連接
-  private async verifyConnection(): Promise<boolean> {
-    if (!this.transporter) {
-      return false;
-    }
-
-    try {
-      await this.transporter.verify();
-      console.log('✅ [郵件服務] SMTP 連接驗證成功');
-      return true;
-    } catch (error: any) {
-      console.warn('⚠️  [郵件服務] SMTP 連接驗證失敗:', error.message);
-      return false;
-    }
-  }
-
-  async sendEmail(options: EmailOptions, retries: number = 3): Promise<boolean> {
+  async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.transporter) {
       console.warn('⚠️  [郵件服務] 傳輸器未初始化，跳過郵件發送');
       return false;
     }
 
-    const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@shopee2multi.space';
+    try {
+      const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@shopee2multi.space';
+      
+      const info = await this.transporter.sendMail({
+        from: `"Shopee2Multi" <${smtpFrom}>`,
+        to: options.to,
+        subject: options.subject,
+        text: options.text || options.html.replace(/<[^>]*>/g, ''),
+        html: options.html,
+      });
 
-    // 重試機制
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const info = await this.transporter.sendMail({
-          from: `"Shopee2Multi" <${smtpFrom}>`,
-          to: options.to,
-          subject: options.subject,
-          text: options.text || options.html.replace(/<[^>]*>/g, ''),
-          html: options.html,
-        });
-
-        console.log('✅ [郵件服務] 郵件已發送:', info.messageId);
-        return true;
-      } catch (error: any) {
-        const isLastAttempt = attempt === retries;
-        const errorMessage = error.message || String(error);
-        const errorCode = error.code || 'UNKNOWN';
-
-        console.error(`❌ [郵件服務] 發送郵件失敗 (嘗試 ${attempt}/${retries}):`, errorMessage);
-        console.error(`   錯誤代碼: ${errorCode}`);
-
-        // 如果是連接超時錯誤，提供更詳細的診斷信息
-        if (errorCode === 'ETIMEDOUT' || errorCode === 'ECONNREFUSED') {
-          console.error('   💡 診斷建議:');
-          console.error('      - 檢查 SMTP_HOST 和 SMTP_PORT 是否正確');
-          console.error('      - 確認服務器可以訪問 SMTP 服務器（檢查防火牆/網絡）');
-          console.error('      - 對於 Gmail，確認已啟用「允許安全性較低的應用程式」或使用應用程式密碼');
-          
-          if (errorCode === 'ETIMEDOUT') {
-            console.error('      - 連接超時：可能是網絡問題或 SMTP 服務器無法訪問');
-          } else if (errorCode === 'ECONNREFUSED') {
-            console.error('      - 連接被拒絕：檢查 SMTP 端口是否正確（Gmail 使用 587 或 465）');
-          }
-        }
-
-        // 如果不是最後一次嘗試，等待後重試
-        if (!isLastAttempt) {
-          const waitTime = attempt * 2000; // 2秒、4秒、6秒...
-          console.log(`   ⏳ 等待 ${waitTime}ms 後重試...`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-        } else {
-          console.error('❌ [郵件服務] 所有重試都失敗，放棄發送郵件');
-        }
-      }
+      console.log('✅ [郵件服務] 郵件已發送:', info.messageId);
+      return true;
+    } catch (error) {
+      console.error('❌ [郵件服務] 發送郵件失敗:', error);
+      return false;
     }
-
-    return false;
   }
 
   async sendContactFormNotification(

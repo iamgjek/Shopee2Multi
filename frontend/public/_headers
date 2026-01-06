@@ -1,9 +1,0 @@
-/*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://shopee2multi-backend.railway.app; font-src 'self' data: https:; object-src 'none'; media-src 'self' https:; frame-src 'none'; upgrade-insecure-requests;
-  X-Frame-Options: SAMEORIGIN
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()
-  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  X-XSS-Protection: 1; mode=block
-
