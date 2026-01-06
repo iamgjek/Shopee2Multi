@@ -367,10 +367,6 @@ export default function Admin() {
               background: darkCardBg,
               fontSize: '15px'
             }}
-            rowStyle={{
-              background: darkCardBg,
-              borderBottom: `1px solid ${darkBorder}`
-            }}
           />
         </div>
       )
@@ -573,10 +569,6 @@ export default function Admin() {
             style={{ 
               background: darkCardBg,
               fontSize: '15px'
-            }}
-            rowStyle={{
-              background: darkCardBg,
-              borderBottom: `1px solid ${darkBorder}`
             }}
           />
         </div>
