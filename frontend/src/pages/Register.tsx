@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
+import SEO from '../components/SEO'
 
 const { Title, Text } = Typography
 
@@ -46,6 +47,13 @@ export default function Register() {
       justifyContent: 'center',
       padding: '60px 24px'
     }}>
+      <SEO
+        title="註冊 - Shopee2Multi"
+        description="建立您的 Shopee2Multi 帳號，免費試用商品轉檔服務。每月 10 件商品免費轉檔，支援蝦皮商品轉換至 momo、PChome、EasyStore、Coupang 等平台。"
+        keywords="Shopee2Multi註冊,商品轉檔註冊,電商轉檔註冊,免費試用"
+        ogTitle="註冊 - Shopee2Multi"
+        ogDescription="建立您的 Shopee2Multi 帳號，免費試用商品轉檔服務。"
+      />
       <div style={{ maxWidth: '480px', width: '100%' }}>
         <Card
           bordered={false}

@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
+import SEO from '../components/SEO'
 
 const { Title, Text } = Typography
 
@@ -171,6 +172,13 @@ export default function Dashboard() {
       minHeight: 'calc(100vh - 112px)',
       padding: '60px 24px'
     }}>
+      <SEO
+        title="儀表板 - Shopee2Multi"
+        description="查看您的轉檔統計與歷史記錄。管理您的商品轉檔任務，追蹤使用量，查看轉檔歷史和下載已完成的檔案。"
+        keywords="轉檔儀表板,轉檔統計,轉檔歷史,商品轉檔記錄"
+        ogTitle="儀表板 - Shopee2Multi"
+        ogDescription="查看您的轉檔統計與歷史記錄，管理商品轉檔任務。"
+      />
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* 標題區 */}
         <div style={{ marginBottom: '48px' }}>

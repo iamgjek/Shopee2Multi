@@ -13,6 +13,7 @@ import {
 import { DownloadOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
+import SEO from '../components/SEO'
 
 const { Title, Paragraph, Text } = Typography
 const { TextArea } = Input
@@ -195,6 +196,13 @@ export default function Converter() {
       minHeight: 'calc(100vh - 112px)',
       padding: '60px 24px'
     }}>
+      <SEO
+        title="商品轉檔工具 - Shopee2Multi"
+        description="貼上蝦皮商品連結，選擇目標平台（momo、PChome、EasyStore、Coupang），一鍵轉換為 Excel 檔案。智能轉換商品格式，自動處理規格映射、圖片裁切、HTML 描述生成。"
+        keywords="蝦皮轉檔工具,商品轉檔,momo轉檔,PChome轉檔,EasyStore轉檔,Coupang轉檔,蝦皮商品轉換,Excel轉檔"
+        ogTitle="商品轉檔工具 - Shopee2Multi"
+        ogDescription="貼上蝦皮商品連結，一鍵轉換為目標平台格式。支援 momo、PChome、EasyStore、Coupang 等平台。"
+      />
       <div style={{ maxWidth: '720px', margin: '0 auto' }}>
         {/* 標題區 */}
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>

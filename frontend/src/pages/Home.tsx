@@ -14,6 +14,7 @@ import {
   ScissorOutlined,
   ArrowRightOutlined
 } from '@ant-design/icons'
+import SEO from '../components/SEO'
 
 const { Title, Paragraph, Text } = Typography
 
@@ -157,6 +158,13 @@ export default function Home() {
 
   return (
     <div style={{ background: darkBg, minHeight: '100vh', color: darkText }}>
+      <SEO
+        title="Shopee2Multi - 30秒從蝦皮到全平台 | 電商跨平台自動化轉檔"
+        description="30秒從蝦皮到全平台，一鍵轉檔讓商品自由移動。支援 momo、PChome、EasyStore、Coupang 等平台，智能轉換商品格式，節省 24 小時上架時間。免費試用，立即開始！"
+        keywords="蝦皮轉檔,電商轉檔,商品轉檔,momo轉檔,PChome轉檔,EasyStore轉檔,Coupang轉檔,電商自動化,商品上架,跨平台轉檔,蝦皮商品轉換,電商工具"
+        ogTitle="Shopee2Multi - 30秒從蝦皮到全平台"
+        ogDescription="一鍵轉檔，讓你的商品自由移動。支援 momo、PChome、EasyStore、Coupang 等平台，智能轉換商品格式。"
+      />
       {/* Hero Section - 全屏背景 */}
       <div 
         style={{

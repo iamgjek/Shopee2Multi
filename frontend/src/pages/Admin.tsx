@@ -24,6 +24,7 @@ import {
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 const { Title, Text } = Typography
 
@@ -296,6 +297,13 @@ export default function Admin() {
 
   return (
     <div style={{ background: darkBg, minHeight: 'calc(100vh - 112px)', padding: '60px 24px' }}>
+      <SEO
+        title="管理後台 - Shopee2Multi"
+        description="Shopee2Multi 管理後台，管理用戶、查看統計數據、監控系統使用情況。"
+        keywords="管理後台,系統管理,用戶管理"
+        ogTitle="管理後台 - Shopee2Multi"
+        ogDescription="Shopee2Multi 管理後台，管理用戶和系統。"
+      />
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Title level={1} style={{ color: darkText, margin: 0 }}>

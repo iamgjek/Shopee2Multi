@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
+import SEO from '../components/SEO'
 
 const { Title, Text } = Typography
 
@@ -46,6 +47,13 @@ export default function Login() {
       justifyContent: 'center',
       padding: '60px 24px'
     }}>
+      <SEO
+        title="登入 - Shopee2Multi"
+        description="登入您的 Shopee2Multi 帳號，開始使用商品轉檔服務。支援蝦皮商品轉換至 momo、PChome、EasyStore、Coupang 等平台。"
+        keywords="Shopee2Multi登入,商品轉檔登入,電商轉檔登入"
+        ogTitle="登入 - Shopee2Multi"
+        ogDescription="登入您的 Shopee2Multi 帳號，開始使用商品轉檔服務。"
+      />
       <div style={{ maxWidth: '480px', width: '100%' }}>
         <Card
           bordered={false}
