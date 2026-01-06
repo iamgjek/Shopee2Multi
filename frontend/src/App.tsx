@@ -3,6 +3,7 @@ import { Layout } from 'antd'
 import { Suspense, lazy } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import ScrollToTop from './components/ScrollToTop'
 import { useAuthStore } from './store/authStore'
 
 // 路由級別的代碼分割 - 只加載需要的組件
@@ -26,11 +27,12 @@ const LoadingFallback = () => (
   </div>
 )
 
-function App() {
+function AppContent() {
   const { token } = useAuthStore()
 
   return (
-    <BrowserRouter>
+    <>
+      <ScrollToTop />
       <Layout style={{ minHeight: '100vh', background: '#0a0a0a' }}>
         <Header />
         <Layout.Content style={{ background: '#0a0a0a' }}>
@@ -69,6 +71,14 @@ function App() {
         </Layout.Content>
         <Footer />
       </Layout>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   )
 }

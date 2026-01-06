@@ -46,12 +46,11 @@ export default function Header() {
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (location.pathname === '/') {
+      // 如果已經在首頁，直接滾動到頂部
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
+      // 如果不在首頁，導航到首頁（ScrollToTop 組件會自動處理滾動）
       navigate('/')
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }, 100)
     }
   }
 
