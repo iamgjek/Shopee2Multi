@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import axios from 'axios';
 
 interface EmailOptions {
   to: string;
@@ -9,8 +10,28 @@ interface EmailOptions {
 
 class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private useResend: boolean = false;
+  private resendApiKey: string | null = null;
+  private resendFrom: string | null = null;
 
   constructor() {
+    this.initializeEmailService();
+  }
+
+  private initializeEmailService() {
+    // 優先檢查 Resend 配置（Vercel 推薦）
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendFrom = process.env.RESEND_FROM || process.env.RESEND_FROM_EMAIL;
+    
+    if (resendApiKey) {
+      this.useResend = true;
+      this.resendApiKey = resendApiKey;
+      this.resendFrom = resendFrom || 'onboarding@resend.dev';
+      console.log('✅ [郵件服務] 使用 Resend API（Vercel 推薦）');
+      return;
+    }
+
+    // 回退到 SMTP
     this.initializeTransporter();
   }
 
@@ -51,15 +72,54 @@ class EmailService {
   }
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
+    // 優先使用 Resend API
+    if (this.useResend && this.resendApiKey) {
+      return await this.sendEmailViaResend(options);
+    }
+
+    // 回退到 SMTP
     if (!this.transporter) {
       console.warn('⚠️  [郵件服務] 傳輸器未初始化，跳過郵件發送');
       return false;
     }
 
+    return await this.sendEmailViaSMTP(options);
+  }
+
+  private async sendEmailViaResend(options: EmailOptions): Promise<boolean> {
+    try {
+      const from = this.resendFrom || 'onboarding@resend.dev';
+      
+      const response = await axios.post(
+        'https://api.resend.com/emails',
+        {
+          from: `Shopee2Multi <${from}>`,
+          to: [options.to],
+          subject: options.subject,
+          html: options.html,
+          text: options.text || options.html.replace(/<[^>]*>/g, ''),
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('✅ [郵件服務] Resend 郵件已發送:', response.data.id);
+      return true;
+    } catch (error: any) {
+      console.error('❌ [郵件服務] Resend 發送郵件失敗:', error.response?.data || error.message);
+      return false;
+    }
+  }
+
+  private async sendEmailViaSMTP(options: EmailOptions): Promise<boolean> {
     try {
       const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@shopee2multi.space';
       
-      const info = await this.transporter.sendMail({
+      const info = await this.transporter!.sendMail({
         from: `"Shopee2Multi" <${smtpFrom}>`,
         to: options.to,
         subject: options.subject,
@@ -67,10 +127,10 @@ class EmailService {
         html: options.html,
       });
 
-      console.log('✅ [郵件服務] 郵件已發送:', info.messageId);
+      console.log('✅ [郵件服務] SMTP 郵件已發送:', info.messageId);
       return true;
     } catch (error) {
-      console.error('❌ [郵件服務] 發送郵件失敗:', error);
+      console.error('❌ [郵件服務] SMTP 發送郵件失敗:', error);
       return false;
     }
   }
@@ -82,6 +142,7 @@ class EmailService {
     subject: string,
     message: string
   ): Promise<boolean> {
+    // 確保通知發送到 iamgjek@gmail.com
     const adminEmail = process.env.ADMIN_EMAIL || 'iamgjek@gmail.com';
     const siteUrl = process.env.SITE_URL || 'https://shopee2multi.space';
 

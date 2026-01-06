@@ -72,28 +72,51 @@ HOST=0.0.0.0
 
 ### 郵件通知配置（聯絡表單）
 
-#### SMTP 配置（必需）
+當有新的聯絡表單提交時，系統會自動發送郵件通知到 `ADMIN_EMAIL`（默認為 `iamgjek@gmail.com`）。
+
+#### 方式一：Resend API（推薦，Vercel 官方推薦）
+
+**Resend 是 Vercel 官方推薦的郵件服務，配置簡單，適合 Vercel 部署。**
+
+1. 前往 [Resend](https://resend.com) 註冊帳號
+2. 在 Dashboard 中創建 API Key
+3. 驗證您的發送域名（或使用測試域名 `onboarding@resend.dev`）
+
+配置環境變數：
+```
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
+RESEND_FROM=noreply@yourdomain.com
+ADMIN_EMAIL=iamgjek@gmail.com
+SITE_URL=https://shopee2multi.space
+```
+
+**說明**：
+- `RESEND_API_KEY`：從 Resend Dashboard 獲取的 API Key
+- `RESEND_FROM`：發送郵件的地址（必須是已驗證的域名，或使用 `onboarding@resend.dev` 進行測試）
+- `ADMIN_EMAIL`：接收通知的郵件地址（默認為 `iamgjek@gmail.com`）
+- 如果配置了 `RESEND_API_KEY`，系統會優先使用 Resend，忽略 SMTP 配置
+
+**Resend 免費方案**：
+- 每月 3,000 封郵件
+- 100 封/天（測試階段）
+- 適合小型應用
+
+#### 方式二：SMTP 配置（傳統方式）
+
+如果未配置 Resend，系統會回退到 SMTP 配置。
+
 ```
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 SMTP_FROM=noreply@shopee2multi.space
-```
-
-#### 通知郵件接收地址（可選）
-```
 ADMIN_EMAIL=iamgjek@gmail.com
-```
-
-#### 網站 URL（用於郵件中的連結，可選）
-```
 SITE_URL=https://shopee2multi.space
 ```
 
 **說明**：
-- 當有新的聯絡表單提交時，系統會自動發送郵件通知到 `ADMIN_EMAIL`（默認為 `iamgjek@gmail.com`）
-- 如果未配置 SMTP，郵件功能將被禁用，但表單仍會正常保存到資料庫
+- 如果未配置 SMTP 和 Resend，郵件功能將被禁用，但表單仍會正常保存到資料庫
 - 對於 Gmail，需要使用「應用程式密碼」而非一般密碼
   - 前往 [Google 帳戶安全設定](https://myaccount.google.com/apppasswords)
   - 生成應用程式密碼並使用它作為 `SMTP_PASSWORD`
@@ -146,14 +169,18 @@ ADMIN_EMAIL=admin@yourdomain.com
 ADMIN_PASSWORD=YourSecurePassword123!
 ADMIN_NAME=系統管理員
 
-# 郵件通知（聯絡表單）
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
-SMTP_FROM=noreply@shopee2multi.space
+# 郵件通知（聯絡表單）- 方式一：Resend（推薦，Vercel 官方推薦）
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxx
+RESEND_FROM=noreply@yourdomain.com
 ADMIN_EMAIL=iamgjek@gmail.com
 SITE_URL=https://shopee2multi.space
+
+# 郵件通知（聯絡表單）- 方式二：SMTP（如果未配置 Resend，會使用此配置）
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USER=your-email@gmail.com
+# SMTP_PASSWORD=your-app-password
+# SMTP_FROM=noreply@shopee2multi.space
 ```
 
 ## 生成 JWT_SECRET
