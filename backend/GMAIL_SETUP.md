@@ -2,6 +2,8 @@
 
 本指南將幫助您配置 Gmail SMTP 來發送聯絡表單通知郵件。
 
+⚠️ **重要提示**：如果您在 Railway 等雲平台上遇到「Connection timeout」錯誤，建議使用 [SendGrid](./SENDGRID_SETUP.md) 作為替代方案。SendGrid 在雲平台上連接更穩定可靠。
+
 ## 步驟 1: 啟用 Gmail 兩步驟驗證
 
 1. 前往 [Google 帳戶安全設定](https://myaccount.google.com/security)

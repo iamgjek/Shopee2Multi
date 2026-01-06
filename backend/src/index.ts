@@ -145,12 +145,13 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https://www.google-analytics.com"],
-      fontSrc: ["'self'", "data:"],
+      imgSrc: ["'self'", "data:", "https:"], // 移除 http: 以強制使用 HTTPS
+      connectSrc: ["'self'", "https://www.google-analytics.com", "https://shopee2multi-backend.railway.app"],
+      fontSrc: ["'self'", "data:", "https:"],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
+      mediaSrc: ["'self'", "https:"],
       frameSrc: ["'none'"],
+      upgradeInsecureRequests: [], // 自動將 HTTP 升級為 HTTPS
     },
   },
   // Prevent clickjacking
