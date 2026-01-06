@@ -9,6 +9,7 @@ import conversionRoutes from './routes/conversion';
 import userRoutes from './routes/user';
 import subscriptionRoutes from './routes/subscription';
 import adminRoutes from './routes/admin';
+import contactRoutes from './routes/contact';
 import { join } from 'path';
 import { autoMigrate } from './db/autoMigrate';
 import { autoSeedAdmin } from './db/autoSeed';
@@ -166,6 +167,7 @@ app.use('/api/conversion', conversionRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Error handling
 app.use(errorHandler);

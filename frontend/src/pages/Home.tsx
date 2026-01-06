@@ -1,7 +1,7 @@
-import { Button, Card, Row, Col, Typography, Divider } from 'antd'
+import { Button, Card, Row, Col, Typography, Divider, Form, Input, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { 
   ThunderboltOutlined, 
   RocketOutlined, 
@@ -12,15 +12,21 @@ import {
   GlobalOutlined,
   FileTextOutlined,
   ScissorOutlined,
-  ArrowRightOutlined
+  ArrowRightOutlined,
+  MailOutlined,
+  UserOutlined,
+  MessageOutlined
 } from '@ant-design/icons'
 import SEO from '../components/SEO'
+import api from '../api/client'
 
 const { Title, Paragraph, Text } = Typography
 
 export default function Home() {
   const navigate = useNavigate()
   const { token } = useAuthStore()
+  const [form] = Form.useForm()
+  const [submitting, setSubmitting] = useState(false)
   
   // 為需要視差效果的 section 創建 refs
   const section1Ref = useRef<HTMLDivElement>(null)
@@ -636,6 +642,154 @@ export default function Home() {
         >
           立即開始免費試用
         </Button>
+      </div>
+
+      <Divider style={{ margin: '0', borderColor: darkBorder }} />
+
+      {/* 聯絡我們 */}
+      <div style={{ ...sectionStyle, padding: '120px 24px', maxWidth: '800px' }} className="fade-in-up">
+        <Title level={2} style={sectionTitleStyle}>
+          聯絡我們
+        </Title>
+        <Paragraph style={bodyTextStyle}>
+          有任何問題或建議？我們很樂意聽到您的聲音
+        </Paragraph>
+        
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: '24px',
+            background: darkCardBg,
+            border: `1px solid ${darkBorder}`,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            marginTop: '48px'
+          }}
+          bodyStyle={{ padding: '48px' }}
+        >
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={async (values) => {
+              setSubmitting(true)
+              try {
+                const response = await api.post('/contact/submit', {
+                  name: values.name,
+                  email: values.email,
+                  subject: values.subject,
+                  message: values.message
+                })
+                message.success(response.data.data.message || '訊息已送出！我們會盡快回覆您。')
+                form.resetFields()
+              } catch (error: any) {
+                const errorMessage = error.response?.data?.error?.message || '送出失敗，請稍後再試'
+                message.error(errorMessage)
+              } finally {
+                setSubmitting(false)
+              }
+            }}
+          >
+            <Form.Item
+              name="name"
+              rules={[{ required: true, message: '請輸入您的姓名' }]}
+            >
+              <Input
+                prefix={<UserOutlined style={{ color: darkTextSecondary }} />}
+                placeholder="姓名"
+                size="large"
+                style={{
+                  height: '48px',
+                  fontSize: '16px',
+                  borderRadius: '12px',
+                  borderColor: darkBorder,
+                  background: darkBg,
+                  color: darkText
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: '請輸入您的電子郵件' },
+                { type: 'email', message: '請輸入有效的電子郵件' }
+              ]}
+            >
+              <Input
+                prefix={<MailOutlined style={{ color: darkTextSecondary }} />}
+                placeholder="電子郵件"
+                size="large"
+                style={{
+                  height: '48px',
+                  fontSize: '16px',
+                  borderRadius: '12px',
+                  borderColor: darkBorder,
+                  background: darkBg,
+                  color: darkText
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="subject"
+              rules={[{ required: true, message: '請輸入主旨' }]}
+            >
+              <Input
+                prefix={<MessageOutlined style={{ color: darkTextSecondary }} />}
+                placeholder="主旨"
+                size="large"
+                style={{
+                  height: '48px',
+                  fontSize: '16px',
+                  borderRadius: '12px',
+                  borderColor: darkBorder,
+                  background: darkBg,
+                  color: darkText
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="message"
+              rules={[{ required: true, message: '請輸入您的訊息' }]}
+            >
+              <Input.TextArea
+                rows={6}
+                placeholder="請輸入您的訊息..."
+                style={{
+                  fontSize: '16px',
+                  borderRadius: '12px',
+                  borderColor: darkBorder,
+                  background: darkBg,
+                  color: darkText,
+                  padding: '16px'
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={submitting}
+                block
+                style={{
+                  height: '56px',
+                  fontSize: '17px',
+                  fontWeight: 500,
+                  borderRadius: '28px',
+                  background: primaryColor,
+                  borderColor: primaryColor,
+                  color: darkBg,
+                  boxShadow: '0 4px 20px rgba(0, 255, 136, 0.4)',
+                  border: 'none'
+                }}
+              >
+                {submitting ? '送出中...' : '送出訊息'}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </div>
 
       {/* Footer */}

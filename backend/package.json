@@ -11,6 +11,7 @@
     "migrate": "tsx src/db/migrate.ts",
     "migrate:error-code": "tsx src/db/migrate-error-code.ts",
     "add-role": "tsx src/db/add-role.ts",
+    "add-contact-table": "tsx src/db/add-contact-table.ts",
     "seed": "tsx src/db/seed.ts",
     "test-template": "tsx src/test-template.ts",
     "postinstall": "npx playwright install chromium --with-deps || true",

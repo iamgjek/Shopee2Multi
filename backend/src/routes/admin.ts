@@ -3,6 +3,7 @@ import { requireAdmin, AuthRequest } from '../middleware/auth';
 import { UserModel } from '../models/User';
 import { UsageLogModel } from '../models/UsageLog';
 import { ConversionTaskModel } from '../models/ConversionTask';
+import { ContactModel } from '../models/Contact';
 import { pool } from '../db/connection';
 import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
@@ -228,6 +229,85 @@ router.get('/stats/top-users', async (req: AuthRequest, res, next) => {
     res.json({
       success: true,
       data: result.rows
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all contact submissions with pagination
+router.get('/contact-submissions', async (req: AuthRequest, res, next) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const status = req.query.status as string | undefined;
+    const offset = (page - 1) * limit;
+
+    const { submissions, total } = await ContactModel.findAll(limit, offset, status);
+
+    res.json({
+      success: true,
+      data: {
+        submissions,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get single contact submission
+router.get('/contact-submissions/:id', async (req: AuthRequest, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const submission = await ContactModel.findById(id);
+    if (!submission) {
+      throw new AppError('Contact submission not found', 404);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        submission
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update contact submission status
+router.patch('/contact-submissions/:id/status', async (req: AuthRequest, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['new', 'read', 'replied', 'archived'].includes(status)) {
+      throw new AppError('Invalid status', 400);
+    }
+
+    const submission = await ContactModel.findById(id);
+    if (!submission) {
+      throw new AppError('Contact submission not found', 404);
+    }
+
+    await ContactModel.updateStatus(id, status as 'new' | 'read' | 'replied' | 'archived');
+
+    const updatedSubmission = await ContactModel.findById(id);
+
+    res.json({
+      success: true,
+      data: {
+        submission: updatedSubmission,
+        message: 'Status updated successfully'
+      }
     });
   } catch (error) {
     next(error);

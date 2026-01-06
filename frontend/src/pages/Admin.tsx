@@ -19,7 +19,9 @@ import {
   CrownOutlined, 
   SearchOutlined,
   EditOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  MailOutlined,
+  EyeOutlined
 } from '@ant-design/icons'
 import api from '../api/client'
 import { useAuthStore } from '../store/authStore'
@@ -54,6 +56,12 @@ export default function Admin() {
   const [editForm, setEditForm] = useState({ plan: 'free', status: 'active', role: 'user' })
   const [stats, setStats] = useState<any>(null)
   const [activeTab, setActiveTab] = useState('users')
+  const [contactSubmissions, setContactSubmissions] = useState<any[]>([])
+  const [contactLoading, setContactLoading] = useState(false)
+  const [contactPagination, setContactPagination] = useState({ page: 1, limit: 20, total: 0 })
+  const [contactStatusFilter, setContactStatusFilter] = useState<string | undefined>(undefined)
+  const [selectedContact, setSelectedContact] = useState<any | null>(null)
+  const [contactDetailModalVisible, setContactDetailModalVisible] = useState(false)
 
   // Dark mode 主題色
   const primaryColor = '#00ff88'
@@ -74,8 +82,11 @@ export default function Admin() {
   useEffect(() => {
     if (currentUser?.role === 'admin') {
       loadData()
+      if (activeTab === 'contacts') {
+        loadContactSubmissions()
+      }
     }
-  }, [pagination.page, searchText])
+  }, [pagination.page, searchText, activeTab, contactPagination.page, contactStatusFilter])
 
   const loadData = async () => {
     try {
@@ -138,76 +149,175 @@ export default function Admin() {
     }
   }
 
+  const loadContactSubmissions = async () => {
+    try {
+      setContactLoading(true)
+      const response = await api.get(
+        `/admin/contact-submissions?page=${contactPagination.page}&limit=${contactPagination.limit}&status=${contactStatusFilter || ''}`
+      )
+      setContactSubmissions(response.data.data.submissions)
+      setContactPagination(prev => ({
+        ...prev,
+        total: response.data.data.pagination.total
+      }))
+    } catch (error: any) {
+      message.error(error.response?.data?.error?.message || '載入失敗')
+    } finally {
+      setContactLoading(false)
+    }
+  }
+
+  const handleViewContact = async (id: string) => {
+    try {
+      const response = await api.get(`/admin/contact-submissions/${id}`)
+      setSelectedContact(response.data.data.submission)
+      setContactDetailModalVisible(true)
+      
+      // 如果狀態是 new，自動標記為 read
+      if (response.data.data.submission.status === 'new') {
+        await api.patch(`/admin/contact-submissions/${id}/status`, { status: 'read' })
+        loadContactSubmissions()
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.error?.message || '載入失敗')
+    }
+  }
+
+  const handleUpdateContactStatus = async (id: string, status: string) => {
+    try {
+      await api.patch(`/admin/contact-submissions/${id}/status`, { status })
+      message.success('狀態更新成功')
+      loadContactSubmissions()
+      if (selectedContact?.id === id) {
+        setSelectedContact({ ...selectedContact, status })
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.error?.message || '更新失敗')
+    }
+  }
+
+  const getContactStatusColor = (status: string) => {
+    switch (status) {
+      case 'new': return '#1890ff'
+      case 'read': return '#52c41a'
+      case 'replied': return '#722ed1'
+      case 'archived': return '#a0a0a0'
+      default: return '#a0a0a0'
+    }
+  }
+
+  const getContactStatusText = (status: string) => {
+    switch (status) {
+      case 'new': return '新訊息'
+      case 'read': return '已讀'
+      case 'replied': return '已回覆'
+      case 'archived': return '已歸檔'
+      default: return status
+    }
+  }
+
   const columns = [
     {
-      title: 'Email',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>Email</Text>,
       dataIndex: 'email',
       key: 'email',
-      render: (text: string) => <Text style={{ color: darkText }}>{text}</Text>
+      render: (text: string) => <Text style={{ color: darkText, fontSize: '15px' }}>{text}</Text>
     },
     {
-      title: '姓名',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>姓名</Text>,
       dataIndex: 'name',
       key: 'name',
-      render: (text: string) => <Text style={{ color: darkTextSecondary }}>{text || '-'}</Text>
+      render: (text: string) => <Text style={{ color: darkText, fontSize: '15px' }}>{text || '-'}</Text>
     },
     {
-      title: '方案',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>方案</Text>,
       dataIndex: 'plan',
       key: 'plan',
       render: (plan: string) => (
-        <Tag color={getPlanColor(plan)} style={{ border: 'none' }}>
+        <Tag 
+          color={getPlanColor(plan)} 
+          style={{ 
+            border: 'none',
+            fontSize: '14px',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontWeight: 500
+          }}
+        >
           {plan === 'free' ? '免費版' : plan === 'pro' ? 'Pro 版' : 'Biz 版'}
         </Tag>
       )
     },
     {
-      title: '狀態',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>狀態</Text>,
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={getStatusColor(status)} style={{ border: 'none' }}>
+        <Tag 
+          color={getStatusColor(status)} 
+          style={{ 
+            border: 'none',
+            fontSize: '14px',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontWeight: 500
+          }}
+        >
           {status === 'active' ? '啟用' : status === 'suspended' ? '暫停' : '已刪除'}
         </Tag>
       )
     },
     {
-      title: '角色',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>角色</Text>,
       dataIndex: 'role',
       key: 'role',
       render: (role: string) => (
-        <Tag color={role === 'admin' ? primaryColor : darkTextSecondary} style={{ border: 'none' }}>
+        <Tag 
+          color={role === 'admin' ? primaryColor : darkTextSecondary} 
+          style={{ 
+            border: 'none',
+            fontSize: '14px',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontWeight: 500
+          }}
+        >
           {role === 'admin' ? '管理員' : '用戶'}
         </Tag>
       )
     },
     {
-      title: '今日使用',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>今日使用</Text>,
       key: 'dailyUsage',
       render: (_: any, record: User) => (
-        <Text style={{ color: darkTextSecondary }}>
+        <Text style={{ color: darkText, fontSize: '15px', fontWeight: 500 }}>
           {record.stats?.dailyUsage || 0}
         </Text>
       )
     },
     {
-      title: '總任務數',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>總任務數</Text>,
       key: 'totalTasks',
       render: (_: any, record: User) => (
-        <Text style={{ color: darkTextSecondary }}>
+        <Text style={{ color: darkText, fontSize: '15px', fontWeight: 500 }}>
           {record.stats?.totalTasks || 0}
         </Text>
       )
     },
     {
-      title: '操作',
+      title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>操作</Text>,
       key: 'action',
       render: (_: any, record: User) => (
         <Button
           type="text"
           icon={<EditOutlined />}
           onClick={() => handleEdit(record)}
-          style={{ color: primaryColor }}
+          style={{ 
+            color: primaryColor,
+            fontSize: '15px',
+            fontWeight: 500,
+            padding: '4px 8px'
+          }}
         >
           編輯
         </Button>
@@ -224,7 +334,7 @@ export default function Admin() {
           <Space style={{ marginBottom: '24px', width: '100%' }} direction="vertical" size="large">
             <Input
               placeholder="搜尋用戶（Email 或姓名）"
-              prefix={<SearchOutlined />}
+              prefix={<SearchOutlined style={{ color: darkTextSecondary }} />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onPressEnter={loadData}
@@ -232,7 +342,9 @@ export default function Admin() {
                 maxWidth: '400px',
                 background: darkBg,
                 borderColor: darkBorder,
-                color: darkText
+                color: darkText,
+                fontSize: '15px',
+                height: '40px'
               }}
               allowClear
             />
@@ -249,9 +361,16 @@ export default function Admin() {
               total: pagination.total,
               onChange: (page) => setPagination(prev => ({ ...prev, page })),
               showSizeChanger: false,
-              showTotal: (total) => `共 ${total} 位用戶`
+              showTotal: (total) => <Text style={{ color: darkTextSecondary, fontSize: '14px' }}>共 {total} 位用戶</Text>
             }}
-            style={{ background: darkCardBg }}
+            style={{ 
+              background: darkCardBg,
+              fontSize: '15px'
+            }}
+            rowStyle={{
+              background: darkCardBg,
+              borderBottom: `1px solid ${darkBorder}`
+            }}
           />
         </div>
       )
@@ -268,20 +387,39 @@ export default function Admin() {
                   bordered={false}
                   style={{
                     background: darkCardBg,
-                    border: `1px solid ${darkBorder}`
+                    border: `1px solid ${darkBorder}`,
+                    borderRadius: '12px',
+                    padding: '8px'
                   }}
+                  bodyStyle={{ padding: '24px' }}
                 >
                   <Statistic
                     title={
-                      <Text style={{ color: darkTextSecondary }}>
+                      <Text style={{ 
+                        color: darkTextSecondary, 
+                        fontSize: '15px',
+                        fontWeight: 500,
+                        marginBottom: '8px',
+                        display: 'block'
+                      }}>
                         {stat.plan === 'free' ? '免費版' : stat.plan === 'pro' ? 'Pro 版' : 'Biz 版'}
                       </Text>
                     }
                     value={stat.count}
-                    prefix={<CrownOutlined style={{ color: getPlanColor(stat.plan) }} />}
-                    valueStyle={{ color: darkText }}
+                    prefix={<CrownOutlined style={{ color: getPlanColor(stat.plan), fontSize: '20px' }} />}
+                    valueStyle={{ 
+                      color: darkText,
+                      fontSize: '32px',
+                      fontWeight: 700,
+                      lineHeight: '1.2'
+                    }}
                     suffix={
-                      <Text style={{ color: darkTextSecondary, fontSize: '14px' }}>
+                      <Text style={{ 
+                        color: darkTextSecondary, 
+                        fontSize: '15px',
+                        fontWeight: 400,
+                        marginLeft: '8px'
+                      }}>
                         ({stat.active} 啟用)
                       </Text>
                     }
@@ -290,6 +428,157 @@ export default function Admin() {
               </Col>
             ))}
           </Row>
+        </div>
+      )
+    },
+    {
+      key: 'contacts',
+      label: (
+        <span>
+          <MailOutlined /> 聯絡表單
+        </span>
+      ),
+      children: (
+        <div>
+          <Space style={{ marginBottom: '24px', width: '100%' }} direction="vertical" size="large">
+            <Space>
+              <Select
+                placeholder="篩選狀態"
+                value={contactStatusFilter}
+                onChange={(value) => setContactStatusFilter(value)}
+                allowClear
+                style={{ 
+                  width: 200, 
+                  background: darkBg, 
+                  borderColor: darkBorder,
+                  fontSize: '15px'
+                }}
+                options={[
+                  { label: '新訊息', value: 'new' },
+                  { label: '已讀', value: 'read' },
+                  { label: '已回覆', value: 'replied' },
+                  { label: '已歸檔', value: 'archived' }
+                ]}
+              />
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={loadContactSubmissions}
+                style={{
+                  background: darkCardBg,
+                  borderColor: darkBorder,
+                  color: darkText,
+                  fontSize: '15px',
+                  fontWeight: 500,
+                  height: '40px'
+                }}
+              >
+                重新整理
+              </Button>
+            </Space>
+          </Space>
+
+          <Table
+            columns={[
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>姓名</Text>,
+                dataIndex: 'name',
+                key: 'name',
+                render: (text: string) => <Text style={{ color: darkText, fontSize: '15px' }}>{text}</Text>
+              },
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>Email</Text>,
+                dataIndex: 'email',
+                key: 'email',
+                render: (text: string) => <Text style={{ color: darkText, fontSize: '15px' }}>{text}</Text>
+              },
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>主旨</Text>,
+                dataIndex: 'subject',
+                key: 'subject',
+                ellipsis: { showTitle: true },
+                render: (text: string) => (
+                  <Text 
+                    style={{ 
+                      color: darkText, 
+                      fontSize: '15px',
+                      maxWidth: '300px',
+                      display: 'block'
+                    }}
+                    title={text}
+                  >
+                    {text}
+                  </Text>
+                )
+              },
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>狀態</Text>,
+                dataIndex: 'status',
+                key: 'status',
+                render: (status: string) => (
+                  <Tag 
+                    color={getContactStatusColor(status)} 
+                    style={{ 
+                      border: 'none',
+                      fontSize: '14px',
+                      padding: '4px 12px',
+                      borderRadius: '6px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {getContactStatusText(status)}
+                  </Tag>
+                )
+              },
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>提交時間</Text>,
+                dataIndex: 'created_at',
+                key: 'created_at',
+                render: (text: string) => (
+                  <Text style={{ fontSize: '15px', color: darkTextSecondary }}>
+                    {new Date(text).toLocaleString('zh-TW')}
+                  </Text>
+                )
+              },
+              {
+                title: <Text style={{ fontSize: '15px', fontWeight: 600, color: darkText }}>操作</Text>,
+                key: 'action',
+                render: (_: any, record: any) => (
+                  <Button
+                    type="text"
+                    icon={<EyeOutlined />}
+                    onClick={() => handleViewContact(record.id)}
+                    style={{ 
+                      color: primaryColor,
+                      fontSize: '15px',
+                      fontWeight: 500,
+                      padding: '4px 8px'
+                    }}
+                  >
+                    查看
+                  </Button>
+                )
+              }
+            ]}
+            dataSource={contactSubmissions}
+            rowKey="id"
+            loading={contactLoading}
+            pagination={{
+              current: contactPagination.page,
+              pageSize: contactPagination.limit,
+              total: contactPagination.total,
+              onChange: (page) => setContactPagination(prev => ({ ...prev, page })),
+              showSizeChanger: false,
+              showTotal: (total) => <Text style={{ color: darkTextSecondary, fontSize: '14px' }}>共 {total} 條訊息</Text>
+            }}
+            style={{ 
+              background: darkCardBg,
+              fontSize: '15px'
+            }}
+            rowStyle={{
+              background: darkCardBg,
+              borderBottom: `1px solid ${darkBorder}`
+            }}
+          />
         </div>
       )
     }
@@ -315,7 +604,11 @@ export default function Admin() {
             style={{
               background: darkCardBg,
               borderColor: darkBorder,
-              color: darkText
+              color: darkText,
+              fontSize: '15px',
+              fontWeight: 500,
+              height: '40px',
+              padding: '0 20px'
             }}
           >
             重新整理
@@ -333,6 +626,183 @@ export default function Admin() {
             border: `1px solid ${darkBorder}`
           }}
         />
+
+        {/* 聯絡表單詳情 Modal */}
+        <Modal
+          title="聯絡表單詳情"
+          open={contactDetailModalVisible}
+          onCancel={() => {
+            setContactDetailModalVisible(false)
+            setSelectedContact(null)
+          }}
+          footer={null}
+          styles={{
+            content: {
+              background: darkCardBg
+            },
+            header: {
+              background: darkCardBg,
+              borderBottom: `1px solid ${darkBorder}`
+            }
+          }}
+        >
+          {selectedContact && (
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  姓名
+                </Text>
+                <Text style={{ 
+                  color: darkText, 
+                  fontSize: '16px',
+                  fontWeight: 500
+                }}>
+                  {selectedContact.name}
+                </Text>
+              </div>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  Email
+                </Text>
+                <Text style={{ 
+                  color: darkText, 
+                  fontSize: '16px',
+                  fontWeight: 500
+                }}>
+                  {selectedContact.email}
+                </Text>
+              </div>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  主旨
+                </Text>
+                <Text style={{ 
+                  color: darkText, 
+                  fontSize: '16px',
+                  fontWeight: 500
+                }}>
+                  {selectedContact.subject}
+                </Text>
+              </div>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  訊息內容
+                </Text>
+                <div style={{
+                  background: darkBg,
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: `1px solid ${darkBorder}`,
+                  color: darkText,
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: '350px',
+                  overflowY: 'auto',
+                  fontSize: '15px',
+                  lineHeight: '1.6',
+                  fontFamily: 'inherit'
+                }}>
+                  {selectedContact.message}
+                </div>
+              </div>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  狀態
+                </Text>
+                <Space>
+                  <Tag 
+                    color={getContactStatusColor(selectedContact.status)} 
+                    style={{ 
+                      border: 'none',
+                      fontSize: '14px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {getContactStatusText(selectedContact.status)}
+                  </Tag>
+                  <Select
+                    value={selectedContact.status}
+                    onChange={(value) => handleUpdateContactStatus(selectedContact.id, value)}
+                    style={{ width: 160, fontSize: '15px' }}
+                    options={[
+                      { label: '新訊息', value: 'new' },
+                      { label: '已讀', value: 'read' },
+                      { label: '已回覆', value: 'replied' },
+                      { label: '已歸檔', value: 'archived' }
+                    ]}
+                  />
+                </Space>
+              </div>
+              <div>
+                <Text style={{ 
+                  color: darkTextSecondary, 
+                  display: 'block', 
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  fontWeight: 500
+                }}>
+                  提交時間
+                </Text>
+                <Text style={{ 
+                  color: darkText,
+                  fontSize: '15px'
+                }}>
+                  {new Date(selectedContact.created_at).toLocaleString('zh-TW')}
+                </Text>
+              </div>
+              <div style={{ marginTop: '32px', textAlign: 'right', paddingTop: '24px', borderTop: `1px solid ${darkBorder}` }}>
+                <Button
+                  onClick={() => {
+                    setContactDetailModalVisible(false)
+                    setSelectedContact(null)
+                  }}
+                  style={{
+                    background: darkCardBg,
+                    borderColor: darkBorder,
+                    color: darkText,
+                    fontSize: '15px',
+                    fontWeight: 500,
+                    padding: '8px 24px',
+                    height: '40px'
+                  }}
+                >
+                  關閉
+                </Button>
+              </div>
+            </Space>
+          )}
+        </Modal>
 
         <Modal
           title="編輯用戶"
@@ -353,15 +823,41 @@ export default function Admin() {
         >
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div>
-              <Text style={{ color: darkTextSecondary, display: 'block', marginBottom: '8px' }}>Email</Text>
-              <Text style={{ color: darkText }}>{selectedUser?.email}</Text>
+              <Text style={{ 
+                color: darkTextSecondary, 
+                display: 'block', 
+                marginBottom: '12px',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
+                Email
+              </Text>
+              <Text style={{ 
+                color: darkText,
+                fontSize: '16px',
+                fontWeight: 500
+              }}>
+                {selectedUser?.email}
+              </Text>
             </div>
             <div>
-              <Text style={{ color: darkTextSecondary, display: 'block', marginBottom: '8px' }}>方案</Text>
+              <Text style={{ 
+                color: darkTextSecondary, 
+                display: 'block', 
+                marginBottom: '12px',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
+                方案
+              </Text>
               <Select
                 value={editForm.plan}
                 onChange={(value) => setEditForm(prev => ({ ...prev, plan: value }))}
-                style={{ width: '100%' }}
+                style={{ 
+                  width: '100%',
+                  fontSize: '15px',
+                  height: '40px'
+                }}
                 options={[
                   { label: '免費版', value: 'free' },
                   { label: 'Pro 版', value: 'pro' },
@@ -370,11 +866,23 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Text style={{ color: darkTextSecondary, display: 'block', marginBottom: '8px' }}>狀態</Text>
+              <Text style={{ 
+                color: darkTextSecondary, 
+                display: 'block', 
+                marginBottom: '12px',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
+                狀態
+              </Text>
               <Select
                 value={editForm.status}
                 onChange={(value) => setEditForm(prev => ({ ...prev, status: value }))}
-                style={{ width: '100%' }}
+                style={{ 
+                  width: '100%',
+                  fontSize: '15px',
+                  height: '40px'
+                }}
                 options={[
                   { label: '啟用', value: 'active' },
                   { label: '暫停', value: 'suspended' },
@@ -383,11 +891,23 @@ export default function Admin() {
               />
             </div>
             <div>
-              <Text style={{ color: darkTextSecondary, display: 'block', marginBottom: '8px' }}>角色</Text>
+              <Text style={{ 
+                color: darkTextSecondary, 
+                display: 'block', 
+                marginBottom: '12px',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
+                角色
+              </Text>
               <Select
                 value={editForm.role}
                 onChange={(value) => setEditForm(prev => ({ ...prev, role: value }))}
-                style={{ width: '100%' }}
+                style={{ 
+                  width: '100%',
+                  fontSize: '15px',
+                  height: '40px'
+                }}
                 options={[
                   { label: '用戶', value: 'user' },
                   { label: '管理員', value: 'admin' }

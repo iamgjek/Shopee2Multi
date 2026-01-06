@@ -20,8 +20,58 @@ export async function autoMigrate(): Promise<void> {
     
     const usersTableExists = checkResult.rows[0].exists;
     
-    if (usersTableExists) {
-      console.log('✅ [自動遷移] 資料庫表已存在，跳過遷移');
+    if (!usersTableExists) {
+      console.log('📝 [自動遷移] 資料庫表不存在，開始執行遷移...');
+    } else {
+      console.log('✅ [自動遷移] 主要資料庫表已存在');
+      
+      // 檢查聯絡表單表是否存在，如果不存在則創建
+      const contactTableCheck = await pool.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'contact_submissions'
+        );
+      `);
+      
+      const contactTableExists = contactTableCheck.rows[0].exists;
+      
+      if (!contactTableExists) {
+        console.log('📝 [自動遷移] 聯絡表單表不存在，開始創建...');
+        try {
+          // 創建聯絡表單表
+          await pool.query(`
+            CREATE TABLE IF NOT EXISTS contact_submissions (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              name VARCHAR(255) NOT NULL,
+              email VARCHAR(255) NOT NULL,
+              subject VARCHAR(500) NOT NULL,
+              message TEXT NOT NULL,
+              status VARCHAR(50) DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'archived')),
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+          `);
+          
+          // 創建索引
+          await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_contact_submissions_email ON contact_submissions(email);
+          `);
+          await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_contact_submissions_status ON contact_submissions(status);
+          `);
+          await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_contact_submissions_created_at ON contact_submissions(created_at);
+          `);
+          
+          console.log('✅ [自動遷移] 聯絡表單表創建成功');
+        } catch (err: any) {
+          console.error('❌ [自動遷移] 創建聯絡表單表失敗:', err.message);
+          // 不拋出錯誤，允許服務繼續啟動
+        }
+      } else {
+        console.log('✅ [自動遷移] 聯絡表單表已存在');
+      }
+      
       return;
     }
     
