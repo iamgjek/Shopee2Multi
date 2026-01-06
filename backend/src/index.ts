@@ -167,14 +167,6 @@ app.use(helmet({
   referrerPolicy: {
     policy: 'strict-origin-when-cross-origin',
   },
-  // Permissions Policy (formerly Feature Policy)
-  permissionsPolicy: {
-    features: {
-      geolocation: ["'none'"],
-      microphone: ["'none'"],
-      camera: ["'none'"],
-    },
-  },
   // Cross-Origin policies
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
@@ -185,6 +177,16 @@ app.use(helmet({
     preload: true,
   },
 }));
+
+// Manually set Permissions-Policy header (not supported in Helmet 7.x)
+// This restricts browser features like geolocation, microphone, camera
+app.use((req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=()'
+  );
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
