@@ -20,11 +20,17 @@
     <!-- Preload critical resources -->
     <link rel="modulepreload" href="/src/main.tsx">
     <!-- Google tag (gtag.js) - Deferred loading for better performance -->
+    <!-- Note: This is analytics only, not advertising. Chrome may block it if ad blockers are enabled. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-GL88JKN4JE');
+      // Configure Google Analytics with privacy-friendly settings
+      gtag('config', 'G-GL88JKN4JE', {
+        'anonymize_ip': true,
+        'allow_google_signals': false,
+        'allow_ad_personalization_signals': false
+      });
       
       // Load Google Analytics script after page load
       // Gracefully handle cases where GA is blocked by ad blockers
@@ -32,6 +38,7 @@
         const script = document.createElement('script');
         script.async = true;
         script.src = 'https://www.googletagmanager.com/gtag/js?id=G-GL88JKN4JE';
+        script.type = 'text/javascript';
         
         // Handle script loading errors (e.g., blocked by ad blocker)
         script.onerror = function() {

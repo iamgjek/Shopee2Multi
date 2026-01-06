@@ -155,8 +155,10 @@ app.use(helmet({
     },
   },
   // Prevent clickjacking
+  // Using SAMEORIGIN instead of DENY for better compatibility
+  // This allows same-origin embedding while preventing cross-origin attacks
   frameguard: {
-    action: 'deny',
+    action: 'sameorigin',
   },
   // Prevent MIME type sniffing
   noSniff: true,
