@@ -70,6 +70,62 @@ NODE_ENV=production
 HOST=0.0.0.0
 ```
 
+### 郵件通知配置（聯絡表單）
+
+#### SMTP 配置（必需）
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@shopee2multi.space
+```
+
+#### 通知郵件接收地址（可選）
+```
+ADMIN_EMAIL=iamgjek@gmail.com
+```
+
+#### 網站 URL（用於郵件中的連結，可選）
+```
+SITE_URL=https://shopee2multi.space
+```
+
+**說明**：
+- 當有新的聯絡表單提交時，系統會自動發送郵件通知到 `ADMIN_EMAIL`（默認為 `iamgjek@gmail.com`）
+- 如果未配置 SMTP，郵件功能將被禁用，但表單仍會正常保存到資料庫
+- 對於 Gmail，需要使用「應用程式密碼」而非一般密碼
+  - 前往 [Google 帳戶安全設定](https://myaccount.google.com/apppasswords)
+  - 生成應用程式密碼並使用它作為 `SMTP_PASSWORD`
+
+**常見 SMTP 服務商配置**：
+
+**Gmail**:
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+```
+
+**詳細配置步驟**：請參考 [GMAIL_SETUP.md](./GMAIL_SETUP.md) 文件
+
+**SendGrid**:
+```
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASSWORD=your-sendgrid-api-key
+```
+
+**Mailgun**:
+```
+SMTP_HOST=smtp.mailgun.org
+SMTP_PORT=587
+SMTP_USER=your-mailgun-username
+SMTP_PASSWORD=your-mailgun-password
+```
+
 ## Railway 配置示例
 
 在 Railway Dashboard → 後端服務 → Variables 中添加：
@@ -89,6 +145,15 @@ AUTO_SEED_ADMIN=true
 ADMIN_EMAIL=admin@yourdomain.com
 ADMIN_PASSWORD=YourSecurePassword123!
 ADMIN_NAME=系統管理員
+
+# 郵件通知（聯絡表單）
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@shopee2multi.space
+ADMIN_EMAIL=iamgjek@gmail.com
+SITE_URL=https://shopee2multi.space
 ```
 
 ## 生成 JWT_SECRET

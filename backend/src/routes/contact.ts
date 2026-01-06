@@ -2,6 +2,7 @@ import express from 'express';
 import { ContactModel } from '../models/Contact';
 import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
+import { emailService } from '../services/emailService';
 
 const router = express.Router();
 
@@ -22,6 +23,18 @@ router.post('/submit', async (req, res, next) => {
     // Create contact submission
     const submission = await ContactModel.create(name, email, subject, message);
     console.log(`✅ [聯絡表單] 表單已儲存, ID: ${submission.id}`);
+
+    // 發送郵件通知（異步執行，不阻塞響應）
+    emailService.sendContactFormNotification(
+      submission.id,
+      name,
+      email,
+      subject,
+      message
+    ).catch((error) => {
+      console.error('❌ [聯絡表單] 郵件通知發送失敗:', error);
+      // 不影響表單提交的成功響應
+    });
 
     res.json({
       success: true,
