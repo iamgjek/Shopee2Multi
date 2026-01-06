@@ -13,6 +13,7 @@ import contactRoutes from './routes/contact';
 import { join } from 'path';
 import { autoMigrate } from './db/autoMigrate';
 import { autoSeedAdmin } from './db/autoSeed';
+import { setCorsHeaders } from './utils/cors';
 
 dotenv.config();
 
@@ -31,29 +32,25 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173'];
 
-// Helper function to check if origin is allowed
-const isOriginAllowed = (origin: string): boolean => {
-  // Check explicit allowed origins
-  if (allowedOrigins.includes(origin)) {
-    console.log(`✅ Origin ${origin} matched explicit allowed origin`);
-    return true;
-  }
+// Import CORS utilities
+import { isOriginAllowed } from './utils/cors';
+
+// Helper function to check if origin is allowed (with logging)
+const isOriginAllowedWithLogging = (origin: string): boolean => {
+  const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173'];
   
-  // Allow Vercel preview deployments (*.vercel.app)
-  if (origin.endsWith('.vercel.app')) {
-    console.log(`✅ Origin ${origin} matched *.vercel.app pattern`);
-    return true;
-  }
-  
-  // Allow shopee2multi.space domain
-  if (origin.includes('shopee2multi.space')) {
-    console.log(`✅ Origin ${origin} matched shopee2multi.space pattern`);
-    return true;
-  }
-  
-  // Allow localhost for development
-  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-    console.log(`✅ Origin ${origin} matched localhost pattern`);
+  if (isOriginAllowed(origin)) {
+    if (allowedOrigins.includes(origin)) {
+      console.log(`✅ Origin ${origin} matched explicit allowed origin`);
+    } else if (origin.endsWith('.vercel.app')) {
+      console.log(`✅ Origin ${origin} matched *.vercel.app pattern`);
+    } else if (origin.includes('shopee2multi.space')) {
+      console.log(`✅ Origin ${origin} matched shopee2multi.space pattern`);
+    } else if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      console.log(`✅ Origin ${origin} matched localhost pattern`);
+    }
     return true;
   }
   
@@ -71,7 +68,7 @@ app.use((req, res, next) => {
     // Always handle OPTIONS preflight requests, even if origin check fails
     // This prevents 502 errors when the server is starting up or having issues
     if (req.method === 'OPTIONS') {
-      if (origin && isOriginAllowed(origin)) {
+      if (origin && isOriginAllowedWithLogging(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -90,7 +87,7 @@ app.use((req, res, next) => {
       }
     }
     
-    if (origin && isOriginAllowed(origin)) {
+    if (origin && isOriginAllowedWithLogging(origin)) {
       // Explicitly set CORS headers to prevent Railway from overriding
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -123,7 +120,7 @@ app.use(cors({
       return callback(null, true);
     }
     
-    if (isOriginAllowed(origin)) {
+    if (isOriginAllowedWithLogging(origin)) {
       // Explicitly return the origin value to ensure correct CORS header
       callback(null, origin);
     } else {
@@ -151,11 +148,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded files with CORS support
 app.use('/uploads', (req, res, next) => {
   // Set CORS headers for static files
-  const origin = req.headers.origin;
-  if (origin && isOriginAllowed(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
+  setCorsHeaders(req, res);
   next();
 }, express.static(join(process.cwd(), 'uploads')));
 

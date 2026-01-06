@@ -7,6 +7,7 @@ import { ConversionTaskModel } from '../models/ConversionTask';
 import { UsageLogModel } from '../models/UsageLog';
 import { UserModel } from '../models/User';
 import { AppError } from '../middleware/errorHandler';
+import { setCorsHeaders } from '../utils/cors';
 import { z } from 'zod';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
@@ -203,28 +204,23 @@ router.get('/download/:taskId', authenticate, async (req: AuthRequest, res, next
       throw new AppError('File not ready', 404);
     }
 
-    // Set CORS headers before download to ensure they're not overridden
-    const origin = req.headers.origin;
-    if (origin) {
-      // Check if origin is allowed (same logic as main CORS middleware)
-      const allowedOrigins = process.env.CORS_ORIGIN 
-        ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-        : ['http://localhost:5173'];
-      
-      const isAllowed = allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        origin.includes('shopee2multi.space') ||
-        origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://127.0.0.1:');
-      
-      if (isAllowed) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
-      }
-    }
+    // Set CORS headers before download
+    setCorsHeaders(req, res);
 
-    res.download(task.result_path, `shopee2multi-${task.platform_target}-${task.id}.xlsx`);
+    // Use sendFile instead of download to have better control over headers
+    // Set Content-Disposition header for file download
+    const filename = `shopee2multi-${task.platform_target}-${task.id}.xlsx`;
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    
+    res.sendFile(join(process.cwd(), task.result_path), (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+        if (!res.headersSent) {
+          next(err);
+        }
+      }
+    });
   } catch (error) {
     next(error);
   }
