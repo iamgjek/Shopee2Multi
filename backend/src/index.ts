@@ -19,6 +19,10 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
+// 信任反向代理（Railway/Vercel），確保 rate limit 能正確讀取 X-Forwarded-For
+// 必須在任何依賴 IP 的中介軟體前設定
+app.set('trust proxy', 1);
+
 // CORS configuration - support multiple origins and Vercel preview deployments
 // MUST be defined and applied BEFORE helmet to ensure CORS headers are set correctly
 const allowedOrigins = process.env.CORS_ORIGIN 
