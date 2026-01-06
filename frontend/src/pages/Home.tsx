@@ -176,7 +176,7 @@ export default function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',
-          loading: 'lazy'
+          willChange: 'transform'
         }}
       >
         {/* 深色遮罩層 */}
