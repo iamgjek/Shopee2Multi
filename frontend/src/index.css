@@ -12,6 +12,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
+  /* 字體顯示優化 - 防止 FOIT (Flash of Invisible Text) */
+  font-display: swap;
+}
+
+/* 優化字體加載 */
+@font-face {
+  font-family: 'System Font Stack';
+  font-display: swap;
 }
 
 #root {

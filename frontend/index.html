@@ -10,26 +10,58 @@
     <meta name="robots" content="index, follow" />
     <meta name="language" content="zh-TW" />
     <title>Shopee2Multi - 電商跨平台自動化轉檔</title>
+    
+    <!-- Resource Hints for Performance Optimization -->
     <!-- Preconnect to external domains for faster loading -->
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="dns-prefetch" href="https://images.unsplash.com">
+    
     <!-- Preload critical resources -->
-    <link rel="modulepreload" href="/src/main.tsx">
+    <link rel="modulepreload" href="/src/main.tsx" as="script">
+    
+    <!-- Prefetch API endpoint for faster API calls -->
+    <link rel="dns-prefetch" href="https://shopee2multi-backend.railway.app">
     <!-- Google tag (gtag.js) - Deferred loading for better performance -->
     <script>
+      // Defer Google Analytics initialization
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-GL88JKN4JE');
-      
-      // Load Google Analytics script after page load
-      window.addEventListener('load', function() {
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-GL88JKN4JE';
-        document.head.appendChild(script);
+      gtag('config', 'G-GL88JKN4JE', {
+        'send_page_view': false // Disable automatic page view
       });
+      
+      // Load Google Analytics script after page is fully loaded
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() {
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-GL88JKN4JE';
+          document.head.appendChild(script);
+          script.onload = function() {
+            gtag('config', 'G-GL88JKN4JE', {
+              'send_page_view': true
+            });
+          };
+        });
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-GL88JKN4JE';
+            document.head.appendChild(script);
+            script.onload = function() {
+              gtag('config', 'G-GL88JKN4JE', {
+                'send_page_view': true
+              });
+            };
+          }, 1000);
+        });
+      }
     </script>
   </head>
   <body>

@@ -27,6 +27,17 @@ export default function Home() {
   const { token } = useAuthStore()
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // 檢測是否為移動設備
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // 為需要視差效果的 section 創建 refs
   const section1Ref = useRef<HTMLDivElement>(null)
@@ -172,11 +183,16 @@ export default function Home() {
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          backgroundImage: 'url(https://images.unsplash.com/photo-1557804506-669a67965ba3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=75)',
+          // 優化背景圖片 - 使用響應式圖片和 WebP
+          backgroundImage: `url(https://images.unsplash.com/photo-1557804506-669a67965ba3?ixlib=rb-4.0.3&auto=format&fit=crop&w=${isMobile ? 768 : 1920}&q=80&fm=webp)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          willChange: 'transform'
+          // 移除 fixed attachment 以提升性能（移動設備）
+          backgroundAttachment: isMobile ? 'scroll' : 'fixed',
+          willChange: 'transform',
+          // 優化渲染性能
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
         }}
       >
         {/* 深色遮罩層 */}
