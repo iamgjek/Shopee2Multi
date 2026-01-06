@@ -212,7 +212,7 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS Configuration:`);
   console.log(`   - Allowed origins from env: ${allowedOrigins.join(', ') || 'none'}`);
-  console.log(`   - Auto-allowing: *.vercel.app, localhost`);
+  console.log(`   - Auto-allowing: *.vercel.app, localhost, *.shopee2multi.space`);
   console.log(`   - Test endpoint: /api/cors-test`);
   console.log(`   - Health check: /health`);
   console.log(`✅ Server is ready to accept connections`);
