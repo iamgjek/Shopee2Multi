@@ -41,7 +41,7 @@
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=iamgjek@gmail.com
-SMTP_PASSWORD=qmvq xygg hvpp uvtl
+SMTP_PASSWORD=xxxx xxxx xxxx xxxx
 SMTP_FROM=service@shopee2multi.space
 ADMIN_EMAIL=iamgjek@gmail.com
 SITE_URL=https://shopee2multi.space
