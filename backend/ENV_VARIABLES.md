@@ -34,8 +34,13 @@ JWT_EXPIRES_IN=7d
 
 ### CORS 配置
 ```
-CORS_ORIGIN=https://shopee2multi.vercel.app
+# 可以設置多個域名，用逗號分隔
+CORS_ORIGIN=https://shopee2multi.vercel.app,https://shopee2multi.space
 ```
+
+**注意**：
+- 代碼會自動允許 `*.vercel.app`、`shopee2multi.space` 和 `localhost` 域名
+- 如果使用自定義域名，請在 `CORS_ORIGIN` 中明確指定
 
 ## 可選環境變數
 
@@ -76,8 +81,8 @@ DATABASE_URL=<自動從資料庫服務獲取>
 # JWT
 JWT_SECRET=<生成強隨機字符串，至少 32 字符>
 
-# CORS
-CORS_ORIGIN=https://shopee2multi.vercel.app
+# CORS（多個域名用逗號分隔）
+CORS_ORIGIN=https://shopee2multi.vercel.app,https://shopee2multi.space
 
 # 自動創建管理員
 AUTO_SEED_ADMIN=true

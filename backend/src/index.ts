@@ -39,13 +39,19 @@ const isOriginAllowed = (origin: string): boolean => {
     return true;
   }
   
+  // Allow shopee2multi.space domain
+  if (origin.includes('shopee2multi.space')) {
+    console.log(`✅ Origin ${origin} matched shopee2multi.space pattern`);
+    return true;
+  }
+  
   // Allow localhost for development
   if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
     console.log(`✅ Origin ${origin} matched localhost pattern`);
     return true;
   }
   
-  console.log(`❌ Origin ${origin} not allowed. Checked against: ${allowedOrigins.join(', ')}, *.vercel.app, localhost`);
+  console.log(`❌ Origin ${origin} not allowed. Checked against: ${allowedOrigins.join(', ')}, *.vercel.app, shopee2multi.space, localhost`);
   return false;
 };
 
