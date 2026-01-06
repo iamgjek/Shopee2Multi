@@ -180,11 +180,12 @@ app.use(helmet({
 }));
 
 // Manually set Permissions-Policy header (not supported in Helmet 7.x)
-// This restricts browser features like geolocation, microphone, camera
+// This restricts browser features and APIs to prevent unauthorized access
+// Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
 app.use((req, res, next) => {
   res.setHeader(
     'Permissions-Policy',
-    'geolocation=(), microphone=(), camera=()'
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
   );
   next();
 });
