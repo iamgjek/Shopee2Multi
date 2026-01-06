@@ -135,11 +135,55 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Middleware - Configure helmet to not interfere with CORS
+// Middleware - Configure helmet with comprehensive security headers
 // Placed AFTER CORS to ensure CORS headers are not overridden
+// Reference: https://web.dev/articles/hacked
 app.use(helmet({
+  // Prevent XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "https://www.google-analytics.com"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  // Prevent clickjacking
+  frameguard: {
+    action: 'deny',
+  },
+  // Prevent MIME type sniffing
+  noSniff: true,
+  // Hide X-Powered-By header
+  hidePoweredBy: true,
+  // XSS Protection (legacy, but still useful)
+  xssFilter: true,
+  // Referrer Policy
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin',
+  },
+  // Permissions Policy (formerly Feature Policy)
+  permissionsPolicy: {
+    features: {
+      geolocation: ["'none'"],
+      microphone: ["'none'"],
+      camera: ["'none'"],
+    },
+  },
+  // Cross-Origin policies
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  // HSTS (HTTP Strict Transport Security) - only in production
+  strictTransportSecurity: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
 
 app.use(express.json());
