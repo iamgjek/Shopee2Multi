@@ -132,12 +132,55 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Middleware - Configure helmet to not interfere with CORS
+// Middleware - Configure helmet with comprehensive security headers
 // Placed AFTER CORS to ensure CORS headers are not overridden
+// These headers help prevent Chrome from flagging the site as suspicious or dangerous
 app.use(helmet({
+  // Content Security Policy - prevent XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.VITE_API_URL || "https://shopee2multi-backend.railway.app"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+  // Prevent clickjacking
+  frameguard: {
+    action: 'deny'
+  },
+  // Prevent MIME type sniffing
+  noSniff: true,
+  // XSS Protection (legacy but still useful)
+  xssFilter: true,
+  // Hide X-Powered-By header
+  hidePoweredBy: true,
+  // HSTS - Force HTTPS
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  // Cross-Origin policies
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  // Referrer Policy
+  referrerPolicy: {
+    policy: "strict-origin-when-cross-origin"
+  }
 }));
+
+// Permissions Policy header (set manually as helmet v7 doesn't support it directly)
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(self)');
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
