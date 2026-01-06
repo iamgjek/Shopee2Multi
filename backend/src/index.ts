@@ -148,8 +148,16 @@ app.use(helmet({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files
-app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+// Serve uploaded files with CORS support
+app.use('/uploads', (req, res, next) => {
+  // Set CORS headers for static files
+  const origin = req.headers.origin;
+  if (origin && isOriginAllowed(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+}, express.static(join(process.cwd(), 'uploads')));
 
 // Rate limiting
 app.use('/api/', rateLimiter);

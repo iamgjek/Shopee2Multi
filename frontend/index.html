@@ -24,10 +24,18 @@
       gtag('config', 'G-GL88JKN4JE');
       
       // Load Google Analytics script after page load
+      // Gracefully handle cases where GA is blocked by ad blockers
       window.addEventListener('load', function() {
         const script = document.createElement('script');
         script.async = true;
         script.src = 'https://www.googletagmanager.com/gtag/js?id=G-GL88JKN4JE';
+        
+        // Handle script loading errors (e.g., blocked by ad blocker)
+        script.onerror = function() {
+          // Silently fail - this is expected behavior when GA is blocked
+          // No action needed, site functionality is not affected
+        };
+        
         document.head.appendChild(script);
       });
     </script>

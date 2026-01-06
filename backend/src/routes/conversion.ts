@@ -203,6 +203,27 @@ router.get('/download/:taskId', authenticate, async (req: AuthRequest, res, next
       throw new AppError('File not ready', 404);
     }
 
+    // Set CORS headers before download to ensure they're not overridden
+    const origin = req.headers.origin;
+    if (origin) {
+      // Check if origin is allowed (same logic as main CORS middleware)
+      const allowedOrigins = process.env.CORS_ORIGIN 
+        ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+        : ['http://localhost:5173'];
+      
+      const isAllowed = allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('shopee2multi.space') ||
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:');
+      
+      if (isAllowed) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+      }
+    }
+
     res.download(task.result_path, `shopee2multi-${task.platform_target}-${task.id}.xlsx`);
   } catch (error) {
     next(error);
